@@ -1,0 +1,18 @@
+#ifndef DS18B20_REGISTERS_H
+#define DS18B20_REGISTERS_H
+
+#define DS18B20_SP_TEMP_LSB_BYTE            0
+#define DS18B20_SP_TEMP_MSB_BYTE            1
+#define DS18B20_SP_TEMP_HIGH_BYTE           2
+#define DS18B20_SP_TEMP_LOW_BYTE            3
+#define DS18B20_SP_CONFIG_BYTE              4
+#define DS18B20_SP_RESERVED_FF_BYTE         5
+#define DS18B20_SP_RESERVED_BYTE            6
+#define DS18B20_SP_RESERVED_10_BYTE         7
+#define DS18B20_SP_CRC_BYTE                 8
+
+#define DS18B20_SP_TEMP_HIGH_DEFAULT_VALUE  0x55
+#define DS18B20_SP_TEMP_LOW_DEFAULT_VALUE   0x00
+#define DS18B20_SP_CONFIG_DEFAULT_VALUE     0x7F
+
+#endif /* DS18B20_REGISTERS_H */
