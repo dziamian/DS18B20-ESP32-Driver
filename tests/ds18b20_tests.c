@@ -11,6 +11,8 @@
 
 #define TAG                             "ds18b20"
 
+#define DS18B20_1W_BUS                  21
+
 #define DS18B20_DEVICES_NO              1
 #define DS18B20_CHECKSUM                1
 
@@ -29,7 +31,7 @@ void ds18b20_init_test(void)
     DS18B20_onewire_t ds18b20_oneWire;
     DS18B20_t ds18b20_devices[DS18B20_DEVICES_NO];
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, CONFIG_DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -64,7 +66,7 @@ void ds18b20_read_temperature_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, CONFIG_DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -130,7 +132,7 @@ void ds18b20_store_registers_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, CONFIG_DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -192,7 +194,7 @@ void ds18b20_restore_registers_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, CONFIG_DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
