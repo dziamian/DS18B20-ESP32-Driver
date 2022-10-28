@@ -28,7 +28,7 @@ DS18B20_temperature_out_t ds18b20_convert_temperature_bytes(uint8_t msb, uint8_t
 {
     lsb &= resolution_masks[resolution];
     return (DS18B20_temperature_out_t) 
-                (lsb + (msb * DS18B20_TEMP_CONVERTER_MSB_MULTIPLIER)) 
+                ((int16_t) (lsb + (msb * DS18B20_TEMP_CONVERTER_MSB_MULTIPLIER))) 
                     / DS18B20_TEMP_CONVERTER_LSB_DIVIDER 
                 - DS18B20_TEMP_CONVERTER_NEGATIVE_BASE * (msb / DS18B20_TEMP_CONVERTER_MSB_DIVIDER);
 }

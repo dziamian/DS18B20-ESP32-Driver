@@ -1,7 +1,5 @@
 #include "ds18b20_tests.h"
 
-#include <stdio.h>
-
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "driver/gpio.h"
@@ -20,9 +18,10 @@
 #define DS18B20_LOWER_ALARM             25
 #define DS18B20_RESOLUTION              DS18B20_RESOLUTION_09
 
-#define DS18B20_TEMP_CHECK_PERIOD_MS    5
-#define DS18B20_STORE_CHECK_PERIOD_MS   3
-#define DS18B20_RESTORE_CHECK_PERIOD_MS 3
+//MINIMUM 10 MS
+#define DS18B20_TEMP_CHECK_PERIOD_MS    10
+#define DS18B20_STORE_CHECK_PERIOD_MS   10
+#define DS18B20_RESTORE_CHECK_PERIOD_MS 10
 
 #define DS18B20_TASK_PERIOD_MS          1000
 
