@@ -4,39 +4,18 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#include "ds18b20_types.h"
 #include "ds18b20_error_codes.h"
 
 #define DS18B20_ROM_SIZE    8
 #define DS18B20_SP_SIZE     9
 
-typedef enum    DS18B20_powermode_t         DS18B20_powermode_t;
-typedef enum    DS18B20_resolution_t        DS18B20_resolution_t;
 typedef struct  DS18B20_onewire_t           DS18B20_onewire_t;
 typedef struct  DS18B20_t                   DS18B20_t;
 
 typedef int16_t                             DS18B20_gpio_t;
 typedef uint8_t                             DS18B20_rom_t[DS18B20_ROM_SIZE];
 typedef uint8_t                             DS18B20_scratchpad_t[DS18B20_SP_SIZE];
-
-typedef float                               DS18B20_temperature_out_t;
-typedef int8_t                              DS18B20_temperature_in_t;
-
-
-enum DS18B20_powermode_t
-{
-    DS18B20_PM_PARASITE = 0,
-    DS18B20_PM_EXTERNAL_SUPPLY,
-    DS18B20_PM_COUNT
-};
-
-enum DS18B20_resolution_t
-{
-    DS18B20_RESOLUTION_09 = 0,
-    DS18B20_RESOLUTION_10,
-    DS18B20_RESOLUTION_11,
-    DS18B20_RESOLUTION_12,
-    DS18B20_RESOLUTION_COUNT
-};
 
 struct DS18B20_onewire_t
 {
