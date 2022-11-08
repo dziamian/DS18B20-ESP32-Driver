@@ -104,7 +104,7 @@ void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire)
     gpio_set_direction(onewire->bus, GPIO_MODE_INPUT);
 }
 
-uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire)
+uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode)
 {
     if (!onewire)
     {
@@ -114,26 +114,48 @@ uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire)
     onewire->lastSearchedDeviceNumber = DS18B20_NO_SEARCHED_DEVICES;
     onewire->lastSearchConflictUnresolved = DS18B20_NO_SEARCH_CONFLICTS;
     onewire->lastSearchConflict = DS18B20_NO_SEARCH_CONFLICTS;
+    onewire->alarmSearchMode = alarmSearchMode;
 
     return DS18B20_OK;
 }
 
-uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire)
+uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode)
 {
     if (!onewire)
     {
         return DS18B20_ERR;
     }
 
-    if (DS18B20_NO_SEARCH_CONFLICTS == onewire->lastSearchConflict 
+    // Restart search procedure only if modes are not the same,
+    // so there is no need to do it manually.
+    if (alarmSearchMode != onewire->alarmSearchMode)
+    {
+        if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
+        {
+            return DS18B20_ERR;
+        }
+    }
+    else if (DS18B20_NO_SEARCH_CONFLICTS == onewire->lastSearchConflict 
         && DS18B20_NO_SEARCHED_DEVICES != onewire->lastSearchedDeviceNumber)
-    {   // Restart search procedure to first cycle
+    {   // Restart search procedure to first cycle when it has been finished.
         // FIXME: two different errors
-        if (DS18B20_OK != ds18b20_restart_search(onewire))
+        if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
         {
             return DS18B20_ERR;
         }
         return DS18B20_ERR;
+    }
+
+    if (!buffer)
+    {   // Buffer can only be set if this is not alarm search.
+        if (!alarmSearchMode)
+        {
+            buffer = &onewire->devices[onewire->lastSearchedDeviceNumber].rom;
+        }
+        else
+        {
+            return DS18B20_ERR;
+        }
     }
 
     if (!ds18b20_reset(onewire))
@@ -141,7 +163,8 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire)
         return DS18B20_ERR;
     }
 
-    ds18b20_write_byte(onewire, DS18B20_SEARCH_ROM);
+    uint8_t searchMode = alarmSearchMode ? DS18B20_ALARM_SEARCH : DS18B20_SEARCH_ROM;
+    ds18b20_write_byte(onewire, searchMode);
 
     uint8_t bitRead = 0;
     uint8_t complementRead = 1;
@@ -158,7 +181,7 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire)
             if (bitRead && complementRead)
             {   // No devices connected to bus (data: 11)
                 // FIXME: two different errors
-                if (DS18B20_OK != ds18b20_restart_search(onewire))
+                if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
                 {
                     return DS18B20_ERR;
                 }
@@ -200,7 +223,7 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire)
             // Set current bit to ROM address buffer
             if (bitSet)
             {
-                onewire->devices[onewire->lastSearchedDeviceNumber].rom[byteNo] |= bitMask;
+                (*buffer)[byteNo] |= bitMask;
             }
 
             ++romBitNo;
@@ -256,9 +279,6 @@ uint8_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
 
     return DS18B20_OK;
 }
-
-//TODO:
-void ds18b20_search_alarm(DS18B20_onewire_t *onewire);
 
 void ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {

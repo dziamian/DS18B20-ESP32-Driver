@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 #include "ds18b20_types.h"
 #include "ds18b20_error_codes.h"
@@ -26,6 +27,7 @@ struct DS18B20_onewire_t
     size_t                  lastSearchedDeviceNumber; 
     int8_t                  lastSearchConflictUnresolved;
     int8_t                  lastSearchConflict;
+    bool                    alarmSearchMode;
 };
 
 struct DS18B20_t
@@ -44,14 +46,13 @@ uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire);
 uint8_t ds18b20_reset(DS18B20_onewire_t *onewire);
 void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire);
 void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire);
-uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire);
+uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode);
 
 /* ROM commands */
-uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire);
+uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode);
 uint8_t ds18b20_read_rom(DS18B20_onewire_t *onewire);
 uint8_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex);
 uint8_t ds18b20_skip_select(DS18B20_onewire_t *onewire);
-void ds18b20_search_alarm(DS18B20_onewire_t *onewire);
 
 /* Function commands */
 void ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex);
