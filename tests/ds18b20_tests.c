@@ -9,18 +9,18 @@
 
 #define TAG                             "ds18b20"
 
-#define DS18B20_1W_BUS                  21
+#define DS18B20_1W_BUS                  19
 
 #define DS18B20_DEVICES_NO              1
 #define DS18B20_CHECKSUM                1
 
 #define DS18B20_UPPER_ALARM             30
 #define DS18B20_LOWER_ALARM             25
-#define DS18B20_RESOLUTION              DS18B20_RESOLUTION_09
+#define DS18B20_RESOLUTION              DS18B20_RESOLUTION_12
 
 //MINIMUM 10 MS
-#define DS18B20_TEMP_CHECK_PERIOD_MS    10
-#define DS18B20_STORE_CHECK_PERIOD_MS   10
+#define DS18B20_TEMP_CHECK_PERIOD_MS    DS18B20_NO_CHECK_PERIOD
+#define DS18B20_STORE_CHECK_PERIOD_MS   DS18B20_NO_CHECK_PERIOD
 #define DS18B20_RESTORE_CHECK_PERIOD_MS 10
 
 #define DS18B20_TASK_PERIOD_MS          1000

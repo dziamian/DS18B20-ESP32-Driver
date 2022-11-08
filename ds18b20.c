@@ -14,7 +14,7 @@
 #define DS18B20_1W_SINGLEDEVICE                 1
 
 #define DS18B20_DEFAULT_VALUE                   0
-
+#define DS18B20_CHECK_PERIOD_MIN_MS             10
 #define DS18B20_WAITING_END                     0
 
 #define DS18B20_READ_TEMPERATURE_BYTES          2
@@ -25,6 +25,7 @@ static bool ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex
 static bool ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum);
 static bool ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum);
 static bool ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex);
+static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs, bool checksum);
 
 bool ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B20_t *devices, size_t devicesNo, bool checksum)
 {
@@ -71,20 +72,24 @@ bool ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B2
                 return false;
             }
         }
-
-        // Read power mode and set it.
-        if (!ds18b20_selectDevice(onewire, deviceIndex))
-        {
-            return false;
-        }
-        ds18b20_read_powermode(onewire, deviceIndex);
-
+        
         // Default resolution after power-up is 12-bit, but prefer to check it and set it.
         if (!ds18b20_selectDevice(onewire, deviceIndex))
         {
             return false;
         }
         if (!ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum))
+        {
+            return false;
+        }
+
+        // Read power mode and set it.
+        // If parasite mode then perform first temperature convertion, because it will not be reliable.
+        if (!ds18b20_selectDevice(onewire, deviceIndex))
+        {
+            return false;
+        }
+        if (DS18B20_PM_PARASITE == ds18b20_read_powermode(onewire, deviceIndex) && !ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD, checksum))
         {
             return false;
         }
@@ -111,32 +116,12 @@ bool ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t dev
 {
     if (!onewire || deviceIndex >= onewire->devicesNo || !temperatureOut)
     {
-        temperatureOut = NULL;
         return false;
     }
 
-    uint16_t waitPeriodMs = ds18b20_millis_to_wait_for_convertion(onewire->devices[deviceIndex].resolution);
-    if (DS18B20_NO_CHECK_PERIOD == checkPeriodMs)
-    {
-        checkPeriodMs = waitPeriodMs;
-    }
-    else if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
-    {
-        temperatureOut = NULL;
-        return false;
-    }
-
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    if (!ds18b20_requestTemperature(onewire, deviceIndex, checkPeriodMs, checksum))
     {
         return false;
-    }
-    ds18b20_convert_temperature(onewire, deviceIndex);
-
-    ds18b20_waitWithChecking(onewire, waitPeriodMs, checkPeriodMs);
-
-    if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
-    {
-        // TODO: end strong pullup
     }
 
     if (!ds18b20_selectDevice(onewire, deviceIndex))
@@ -147,6 +132,7 @@ bool ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t dev
     {
         return false;
     }
+
     *temperatureOut = ds18b20_convert_temperature_bytes(
         onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_MSB_BYTE], 
         onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_LSB_BYTE],
@@ -206,6 +192,10 @@ bool ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t devi
     {
         return false;
     }
+    else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
+    {
+        return false;
+    }
 
     if (!ds18b20_selectDevice(onewire, deviceIndex))
     {
@@ -217,7 +207,7 @@ bool ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t devi
 
     if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
     {
-        // TODO: end strong pullup
+        ds18b20_parasite_end_pullup(onewire);
     }
 
     return true;
@@ -239,6 +229,10 @@ bool ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t de
     if (DS18B20_NO_CHECK_PERIOD == checkPeriodMs)
     {
         checkPeriodMs = waitPeriodMs;
+    }
+    else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
+    {
+        return false;
     }
 
     if (!ds18b20_selectDevice(onewire, deviceIndex))
@@ -344,6 +338,38 @@ static bool ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex)
         {
             return false;
         }
+    }
+
+    return true;
+}
+
+static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs, bool checksum)
+{
+    uint16_t waitPeriodMs = ds18b20_millis_to_wait_for_convertion(onewire->devices[deviceIndex].resolution);
+    if (DS18B20_NO_CHECK_PERIOD == checkPeriodMs)
+    {
+        checkPeriodMs = waitPeriodMs;
+    }
+    else if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
+    {
+        return false;
+    }
+    else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
+    {
+        return false;
+    }
+
+    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    {
+        return false;
+    }
+    ds18b20_convert_temperature(onewire, deviceIndex);
+
+    ds18b20_waitWithChecking(onewire, waitPeriodMs, checkPeriodMs);
+
+    if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
+    {
+        ds18b20_parasite_end_pullup(onewire);
     }
 
     return true;

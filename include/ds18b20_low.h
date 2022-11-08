@@ -42,6 +42,7 @@ void ds18b20_write_byte(DS18B20_onewire_t *onewire, uint8_t byte);
 uint8_t ds18b20_read_bit(DS18B20_onewire_t *onewire);
 uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire);
 uint8_t ds18b20_reset(DS18B20_onewire_t *onewire);
+void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire);
 void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire);
 uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire);
 
@@ -59,7 +60,7 @@ uint8_t ds18b20_read_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex);
 uint8_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead);
 void ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex);
 void ds18b20_recall_e2(DS18B20_onewire_t *onewire);
-void ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex);
+DS18B20_powermode_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex);
 
 /* Helpers */
 uint16_t ds18b20_millis_to_wait_for_convertion(DS18B20_resolution_t resolution);
