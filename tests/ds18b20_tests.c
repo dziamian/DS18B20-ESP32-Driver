@@ -30,7 +30,7 @@ void ds18b20_init_test(void)
     DS18B20_onewire_t ds18b20_oneWire;
     DS18B20_t ds18b20_devices[DS18B20_DEVICES_NO];
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (DS18B20_OK != ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -65,7 +65,7 @@ void ds18b20_read_temperature_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (DS18B20_OK != ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -85,7 +85,7 @@ void ds18b20_read_temperature_test(void)
         ESP_LOGI(TAG, "Resolution %d: %d", i, ds18b20_devices[i].resolution + 9);
         ESP_LOGI(TAG, "Power mode %d: %d", i, ds18b20_devices[i].powerMode);
 
-        if (!ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
+        if (DS18B20_OK != ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Failure while configuring device no. %d.", i);
             return;
@@ -106,7 +106,7 @@ void ds18b20_read_temperature_test(void)
         DS18B20_temperature_out_t temperature;
         for (size_t i = 0; i < DS18B20_DEVICES_NO; ++i)
         {
-            if (!ds18b20__GetTemperatureCWithChecking(&ds18b20_oneWire, i, &temperature, DS18B20_TEMP_CHECK_PERIOD_MS, DS18B20_CHECKSUM))
+            if (DS18B20_OK != ds18b20__GetTemperatureCWithChecking(&ds18b20_oneWire, i, &temperature, DS18B20_TEMP_CHECK_PERIOD_MS, DS18B20_CHECKSUM))
             {
                 ESP_LOGI(TAG, "Failure while reading temperature from device no. %d...", i);
             }
@@ -131,7 +131,7 @@ void ds18b20_store_registers_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (DS18B20_OK != ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -151,7 +151,7 @@ void ds18b20_store_registers_test(void)
         ESP_LOGI(TAG, "Resolution %d: %d", i, ds18b20_devices[i].resolution + 9);
         ESP_LOGI(TAG, "Power mode %d: %d", i, ds18b20_devices[i].powerMode);
 
-        if (!ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
+        if (DS18B20_OK != ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Failure while configuring device no. %d.", i);
             return;
@@ -169,7 +169,7 @@ void ds18b20_store_registers_test(void)
 
     for (size_t i = 0; i < DS18B20_DEVICES_NO; ++i)
     {
-        while (!ds18b20__StoreRegistersWithChecking(&ds18b20_oneWire, i, DS18B20_STORE_CHECK_PERIOD_MS))
+        while (DS18B20_OK != ds18b20__StoreRegistersWithChecking(&ds18b20_oneWire, i, DS18B20_STORE_CHECK_PERIOD_MS))
         {
             ESP_LOGI(TAG, "Failure while trying to store registers into EEPROM (device no. %d).", i);
 
@@ -193,7 +193,7 @@ void ds18b20_restore_registers_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (DS18B20_OK != ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -213,7 +213,7 @@ void ds18b20_restore_registers_test(void)
         ESP_LOGI(TAG, "Resolution %d: %d", i, ds18b20_devices[i].resolution + 9);
         ESP_LOGI(TAG, "Power mode %d: %d", i, ds18b20_devices[i].powerMode);
 
-        if (!ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
+        if (DS18B20_OK != ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Failure while configuring device no. %d.", i);
             return;
@@ -231,7 +231,7 @@ void ds18b20_restore_registers_test(void)
 
     for (size_t i = 0; i < DS18B20_DEVICES_NO; ++i)
     {
-        while (!ds18b20__RestoreRegistersWithChecking(&ds18b20_oneWire, i, DS18B20_RESTORE_CHECK_PERIOD_MS, DS18B20_CHECKSUM))
+        while (DS18B20_OK != ds18b20__RestoreRegistersWithChecking(&ds18b20_oneWire, i, DS18B20_RESTORE_CHECK_PERIOD_MS, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Failure while trying to store registers into EEPROM (device no. %d).", i);
 
@@ -262,7 +262,7 @@ void ds18b20_find_alarms_test(void)
         .resolution = DS18B20_RESOLUTION
     };
 
-    if (!ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
+    if (DS18B20_OK != ds18b20__InitOneWire(&ds18b20_oneWire, DS18B20_1W_BUS, ds18b20_devices, DS18B20_DEVICES_NO, DS18B20_CHECKSUM))
     {
         ESP_LOGI(TAG, "Failure while initializing DS18B20 One-Wire driver.");
         return;
@@ -282,7 +282,7 @@ void ds18b20_find_alarms_test(void)
         ESP_LOGI(TAG, "Resolution %d: %d", i, ds18b20_devices[i].resolution + 9);
         ESP_LOGI(TAG, "Power mode %d: %d", i, ds18b20_devices[i].powerMode);
 
-        if (!ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
+        if (DS18B20_OK != ds18b20__Configure(&ds18b20_oneWire, i, &ds18b20_config, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Failure while configuring device no. %d.", i);
             return;
@@ -302,7 +302,7 @@ void ds18b20_find_alarms_test(void)
     {
         for (size_t i = 0; i < DS18B20_DEVICES_NO; ++i)
         {
-            if (!ds18b20__RequestTemperatureC(&ds18b20_oneWire, i))
+            if (DS18B20_OK != ds18b20__RequestTemperatureC(&ds18b20_oneWire, i))
             {
                 ESP_LOGI(TAG, "Failure while requesting temperature from device no. %d...", i);
             }
@@ -314,7 +314,7 @@ void ds18b20_find_alarms_test(void)
         ESP_LOGI(TAG, "Searching for alarms...");
         
         size_t deviceIndex;
-        while (ds18b20__FindNextAlarm(&ds18b20_oneWire, &deviceIndex, DS18B20_CHECKSUM))
+        while (DS18B20_OK == ds18b20__FindNextAlarm(&ds18b20_oneWire, &deviceIndex, DS18B20_CHECKSUM))
         {
             ESP_LOGI(TAG, "Alarm found in device no. %d!", deviceIndex);
         }

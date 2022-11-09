@@ -21,23 +21,24 @@
 #define DS18B20_READ_CONFIGURATION_BYTES        5
 
 static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPeriodMs, uint16_t checkPeriodMs);
-static bool ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum);
-static bool ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum);
-static bool ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum);
-static bool ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum);
-static bool ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex);
-static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs);
+static DS18B20_error_t ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum);
+static DS18B20_error_t ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum);
+static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum);
+static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum);
+static DS18B20_error_t ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex);
+static DS18B20_error_t ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs);
 
-bool ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B20_t *devices, size_t devicesNo, bool checksum)
+DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B20_t *devices, size_t devicesNo, bool checksum)
 {
+    DS18B20_error_t status;
     if (!onewire || !devices || !devicesNo)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
     if (ESP_OK != gpio_reset_pin(bus))
     {
-        return false;
+        return DS18B20_INV_CONF;
     }
 
     onewire->bus = bus;
@@ -45,9 +46,10 @@ bool ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B2
     onewire->devicesNo = devicesNo;
 
     // Manually calling restart search for the first time, because internal values have not been set yet.
-    if (DS18B20_OK != ds18b20_restart_search(onewire, false))
+    status = ds18b20_restart_search(onewire, false);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
     for (size_t deviceIndex = 0; deviceIndex < devicesNo; ++deviceIndex)
@@ -61,93 +63,118 @@ bool ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B2
         if (DS18B20_1W_SINGLEDEVICE != devicesNo)
         {
             // Search ROM from next device and set it.
-            if (!ds18b20_searchRom(onewire, deviceIndex, checksum))
+            status = ds18b20_searchRom(onewire, deviceIndex, checksum);
+            if (DS18B20_OK != status)
             {
-                return false;
+                return status;
             }
         }
         else
         {
             // Read ROM from device and set it.
-            if (!ds18b20_readRom(onewire, checksum))
+            status = ds18b20_readRom(onewire, checksum);
+            if (DS18B20_OK != status)
             {
-                return false;
+                return status;
             }
         }
         
         // Default resolution after power-up is 12-bit, but prefer to check it and set it.
-        if (!ds18b20_selectDevice(onewire, deviceIndex))
+        status = ds18b20_selectDevice(onewire, deviceIndex);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
         }
-        if (!ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum))
+        status = ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
         }
 
         // Read power mode and set it.
         // If parasite mode then perform first temperature convertion, because it will not be reliable.
-        if (!ds18b20_selectDevice(onewire, deviceIndex))
+        status = ds18b20_selectDevice(onewire, deviceIndex);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
         }
-        if (DS18B20_PM_PARASITE == ds18b20_read_powermode(onewire, deviceIndex) && !ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD))
+        status = ds18b20_read_powermode(onewire, deviceIndex);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
+        }
+        if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
+        {
+            status = ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
+            if (DS18B20_OK != status)
+            {
+                return status;
+            }
         }
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-bool ds18b20__InitConfigDefault(DS18B20_config_t *config)
+DS18B20_error_t ds18b20__InitConfigDefault(DS18B20_config_t *config)
 {
+    if (!config)
+    {
+        return DS18B20_INV_ARG;
+    }
+    
     config->upperAlarm = DS18B20_SP_TEMP_HIGH_DEFAULT_VALUE;
     config->lowerAlarm = DS18B20_SP_TEMP_LOW_DEFAULT_VALUE;
     config->resolution = ds18b20_config_byte_to_resolution(DS18B20_SP_CONFIG_DEFAULT_VALUE);
     
-    return true;
+    return DS18B20_OK;
 }
 
-bool ds18b20__RequestTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20__RequestTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
-    if (!ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD))
+    status = ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-bool ds18b20__GetTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, bool checksum)
+DS18B20_error_t ds18b20__GetTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, bool checksum)
 {
     return ds18b20__GetTemperatureCWithChecking(onewire, deviceIndex, temperatureOut, DS18B20_NO_CHECK_PERIOD, checksum);
 }
 
-bool ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, uint16_t checkPeriodMs, bool checksum)
+DS18B20_error_t ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, uint16_t checkPeriodMs, bool checksum)
 {
+    DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo || !temperatureOut)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
-    if (!ds18b20_requestTemperature(onewire, deviceIndex, checkPeriodMs))
+    status = ds18b20_requestTemperature(onewire, deviceIndex, checkPeriodMs);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    if (!ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_TEMPERATURE_BYTES, checksum))
+    status = ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_TEMPERATURE_BYTES, checksum);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
     *temperatureOut = ds18b20_convert_temperature_bytes(
@@ -156,50 +183,60 @@ bool ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t dev
         onewire->devices[deviceIndex].resolution
     );
 
-    return true;
+    return DS18B20_OK;
 }
 
-bool ds18b20__Configure(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_config_t *config, bool checksum)
+DS18B20_error_t ds18b20__Configure(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_config_t *config, bool checksum)
 {
+    DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
     onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_HIGH_BYTE] = config->upperAlarm;
     onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_LOW_BYTE] = config->lowerAlarm;
     onewire->devices[deviceIndex].scratchpad[DS18B20_SP_CONFIG_BYTE] = ds18b20_resolution_to_config_byte(config->resolution);
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    ds18b20_write_scratchpad(onewire, deviceIndex);
-
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_write_scratchpad(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
-    }
-    if (!ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum))
-    {
-        return false;
+        return status;
     }
 
-    return true;
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
+    {
+        return status;
+    }
+    status = ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum);
+    if (DS18B20_OK != status)
+    {
+        return status;
+    }
+
+    return DS18B20_OK;
 }
 
-bool ds18b20__FindNextAlarm(DS18B20_onewire_t *onewire, size_t *deviceIndexOut, bool checksum)
+DS18B20_error_t ds18b20__FindNextAlarm(DS18B20_onewire_t *onewire, size_t *deviceIndexOut, bool checksum)
 {
+    DS18B20_error_t status;
     if (!onewire || !deviceIndexOut)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
     DS18B20_rom_t alarmRom;
     memset(alarmRom, DS18B20_DEFAULT_VALUE, DS18B20_ROM_SIZE);
-    if (!ds18b20_searchAlarm(onewire, &alarmRom, checksum))
+    status = ds18b20_searchAlarm(onewire, &alarmRom, checksum);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
     for (size_t deviceIndex = 0; deviceIndex < onewire->devicesNo; ++deviceIndex)
@@ -217,23 +254,24 @@ bool ds18b20__FindNextAlarm(DS18B20_onewire_t *onewire, size_t *deviceIndexOut, 
         if (i >= DS18B20_ROM_SIZE)
         {
             *deviceIndexOut = deviceIndex;
-            return true;
+            return DS18B20_OK;
         }
     }
 
-    return false;
+    return DS18B20_DEVICE_NOT_FOUND;
 }
 
-bool ds18b20__StoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20__StoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
     return ds18b20__StoreRegistersWithChecking(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
 }
 
-bool ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
+DS18B20_error_t ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
 {
+    DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
     uint16_t waitPeriodMs = DS18B20_SCRATCHPAD_COPY_DELAY_MS;
@@ -243,18 +281,23 @@ bool ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t devi
     }
     else if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
     {
-        return false;
+        return DS18B20_INV_OP;
     }
     else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    ds18b20_copy_scratchpad(onewire, deviceIndex);
+    status = ds18b20_copy_scratchpad(onewire, deviceIndex);
+    if (DS18B20_OK != status)
+    {
+        return status;
+    }
 
     ds18b20_waitWithChecking(onewire, waitPeriodMs, checkPeriodMs);
 
@@ -263,19 +306,20 @@ bool ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t devi
         ds18b20_parasite_end_pullup(onewire);
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-bool ds18b20__RestoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
+DS18B20_error_t ds18b20__RestoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
 {
     return ds18b20__RestoreRegistersWithChecking(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD, checksum);
 }
 
-bool ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs, bool checksum)
+DS18B20_error_t ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs, bool checksum)
 {
+    DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
     uint16_t waitPeriodMs = DS18B20_EEPROM_RESTORE_DELAY_MS;
@@ -285,27 +329,34 @@ bool ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t de
     }
     else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    ds18b20_recall_e2(onewire);
+    status = ds18b20_recall_e2(onewire);
+    if (DS18B20_OK != status)
+    {
+        return status;
+    }
 
     ds18b20_waitWithChecking(onewire, waitPeriodMs, checkPeriodMs);
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    if (!ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum))
+    status = ds18b20_readRegisters(onewire, deviceIndex, checksum ? DS18B20_SP_SIZE : DS18B20_READ_CONFIGURATION_BYTES, checksum);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
 static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPeriodMs, uint16_t checkPeriodMs)
@@ -323,11 +374,12 @@ static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPe
     }
 }
 
-static bool ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum)
+static DS18B20_error_t ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum)
 {
-    if (DS18B20_OK != ds18b20_read_scratchpad_with_stop(onewire, deviceIndex, bytesToRead))
+    DS18B20_error_t status = ds18b20_read_scratchpad_with_stop(onewire, deviceIndex, bytesToRead);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
     
     if (bytesToRead > DS18B20_SP_CONFIG_BYTE)
@@ -341,14 +393,15 @@ static bool ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex
             DS18B20_CRC8_POLYNOMIAL_WITHOUT_MSB, onewire->devices[deviceIndex].scratchpad[DS18B20_SP_CRC_BYTE]);
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-static bool ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum)
+static DS18B20_error_t ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum)
 {
-    if (DS18B20_OK != ds18b20_read_rom(onewire))
+    DS18B20_error_t status = ds18b20_read_rom(onewire);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
     
     if (checksum)
@@ -357,14 +410,15 @@ static bool ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum)
             DS18B20_CRC8_POLYNOMIAL_WITHOUT_MSB, onewire->devices->rom[DS18B20_ROM_CRC_BYTE]);
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-static bool ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
+static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
 {
-    if (DS18B20_OK != ds18b20_search_rom(onewire, NULL, false))
+    DS18B20_error_t status = ds18b20_search_rom(onewire, NULL, false);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
     
     if (checksum)
@@ -373,14 +427,15 @@ static bool ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bo
             DS18B20_CRC8_POLYNOMIAL_WITHOUT_MSB, onewire->devices[deviceIndex].rom[DS18B20_ROM_CRC_BYTE]);
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-static bool ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum)
+static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum)
 {
-    if (DS18B20_OK != ds18b20_search_rom(onewire, buffer, true))
+    DS18B20_error_t status = ds18b20_search_rom(onewire, buffer, true);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
     
     if (checksum)
@@ -389,31 +444,35 @@ static bool ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffe
             DS18B20_CRC8_POLYNOMIAL_WITHOUT_MSB, (*buffer)[DS18B20_ROM_CRC_BYTE]);
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-static bool ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex)
+static DS18B20_error_t ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    DS18B20_error_t status;
     if (DS18B20_1W_SINGLEDEVICE != onewire->devicesNo)
     {
-        if (DS18B20_OK != ds18b20_select(onewire, deviceIndex))
+        status = ds18b20_select(onewire, deviceIndex);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
         }
     }
     else
     {
-        if (DS18B20_OK != ds18b20_skip_select(onewire))
+        status = ds18b20_skip_select(onewire);
+        if (DS18B20_OK != status)
         {
-            return false;
+            return status;
         }
     }
 
-    return true;
+    return DS18B20_OK;
 }
 
-static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
+static DS18B20_error_t ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
 {
+    DS18B20_error_t status;
     uint16_t waitPeriodMs = ds18b20_millis_to_wait_for_convertion(onewire->devices[deviceIndex].resolution);
     if (DS18B20_NO_CHECK_PERIOD == checkPeriodMs)
     {
@@ -421,18 +480,23 @@ static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t device
     }
     else if (DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode)
     {
-        return false;
+        return DS18B20_INV_OP;
     }
     else if (DS18B20_CHECK_PERIOD_MIN_MS > checkPeriodMs)
     {
-        return false;
+        return DS18B20_INV_ARG;
     }
 
-    if (!ds18b20_selectDevice(onewire, deviceIndex))
+    status = ds18b20_selectDevice(onewire, deviceIndex);
+    if (DS18B20_OK != status)
     {
-        return false;
+        return status;
     }
-    ds18b20_convert_temperature(onewire, deviceIndex);
+    status = ds18b20_convert_temperature(onewire, deviceIndex);
+    if (DS18B20_OK != status)
+    {
+        return status;
+    }
 
     ds18b20_waitWithChecking(onewire, waitPeriodMs, checkPeriodMs);
 
@@ -441,5 +505,5 @@ static bool ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t device
         ds18b20_parasite_end_pullup(onewire);
     }
 
-    return true;
+    return DS18B20_OK;
 }

@@ -12,7 +12,7 @@
 
 static void ds18b20_discard_lsb(uint8_t *data, size_t dataSize);
 
-bool ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t polynomialWithoutMsb, uint8_t crcValue)
+DS18B20_error_t ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t polynomialWithoutMsb, uint8_t crcValue)
 {
     uint8_t *dataCopy = malloc(dataSize);
     memcpy(dataCopy, data, dataSize);
@@ -32,7 +32,7 @@ bool ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t polynomialWit
         }
     }
 
-    bool status = (*dataCopy) == crcValue;
+    DS18B20_error_t status = ((*dataCopy) == crcValue) ? DS18B20_OK : DS18B20_CRC_FAIL;
     free(dataCopy);
     
     return status;

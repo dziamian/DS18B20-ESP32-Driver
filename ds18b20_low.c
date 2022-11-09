@@ -14,6 +14,9 @@
 #define DS18B20_NO_SEARCHED_DEVICES 0
 #define DS18B20_NO_SEARCH_CONFLICTS -1
 
+#define DS18B20_INVALID_READ        2
+#define DS18B20_ABSENCE             0
+
 #define noInterrupts()              portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;taskENTER_CRITICAL(&mux)
 #define interrupts()                taskEXIT_CRITICAL(&mux)
 
@@ -27,6 +30,11 @@ static uint16_t resolution_delays_ms[DS18B20_RESOLUTION_COUNT] =
 
 void ds18b20_write_bit(DS18B20_onewire_t *onewire, uint8_t bit)
 {
+    if (!onewire)
+    {
+        return;
+    }
+
     gpio_set_direction(onewire->bus, GPIO_MODE_OUTPUT);
     
     noInterrupts();
@@ -47,6 +55,11 @@ void ds18b20_write_byte(DS18B20_onewire_t *onewire, uint8_t byte)
 
 uint8_t ds18b20_read_bit(DS18B20_onewire_t *onewire)
 {
+    if (!onewire)
+    {
+        return DS18B20_INVALID_READ;
+    }
+    
     gpio_set_direction(onewire->bus, GPIO_MODE_OUTPUT);
     
     noInterrupts();
@@ -78,6 +91,11 @@ uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire)
 
 uint8_t ds18b20_reset(DS18B20_onewire_t *onewire)
 {
+    if (!onewire)
+    {
+        return DS18B20_ABSENCE;
+    }
+    
     gpio_set_direction(onewire->bus, GPIO_MODE_OUTPUT);
     
     noInterrupts();
@@ -95,55 +113,52 @@ uint8_t ds18b20_reset(DS18B20_onewire_t *onewire)
 
 void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire)
 {
+    if (!onewire)
+    {
+        return;
+    }
+
     gpio_set_direction(onewire->bus, GPIO_MODE_OUTPUT);
     gpio_set_level(onewire->bus, DS18B20_LEVEL_HIGH);
 }
 
 void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire)
 {
+    if (!onewire)
+    {
+        return;
+    }
+
     gpio_set_direction(onewire->bus, GPIO_MODE_INPUT);
 }
 
-uint8_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode)
+DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode)
 {
+    DS18B20_error_t status;
     if (!onewire)
     {
-        return DS18B20_ERR;
-    }
-
-    onewire->lastSearchedDeviceNumber = DS18B20_NO_SEARCHED_DEVICES;
-    onewire->lastSearchConflictUnresolved = DS18B20_NO_SEARCH_CONFLICTS;
-    onewire->lastSearchConflict = DS18B20_NO_SEARCH_CONFLICTS;
-    onewire->alarmSearchMode = alarmSearchMode;
-
-    return DS18B20_OK;
-}
-
-uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode)
-{
-    if (!onewire)
-    {
-        return DS18B20_ERR;
+        return DS18B20_INV_ARG;
     }
 
     // Restart search procedure only if modes are not the same,
     // so there is no need to do it manually.
     if (alarmSearchMode != onewire->alarmSearchMode)
     {
-        if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
+        status = ds18b20_restart_search(onewire, alarmSearchMode);
+        if (DS18B20_OK != status)
         {
-            return DS18B20_ERR;
+            return status;
         }
     }
     else if (DS18B20_NO_SEARCH_CONFLICTS == onewire->lastSearchConflict 
         && DS18B20_NO_SEARCHED_DEVICES != onewire->lastSearchedDeviceNumber)
     {   // Restart search procedure to first cycle when it has been finished.
-        // FIXME: two different errors
-        if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
+        status = ds18b20_restart_search(onewire, alarmSearchMode);
+        if (DS18B20_OK != status)
         {
-            return DS18B20_ERR;
+            return status;
         }
-        return DS18B20_ERR;
+        return DS18B20_NO_MORE_DEVICES;
     }
 
     if (!buffer)
@@ -154,13 +169,13 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bo
         }
         else
         {
-            return DS18B20_ERR;
+            return DS18B20_INV_ARG;
         }
     }
 
     if (!ds18b20_reset(onewire))
     {
-        return DS18B20_ERR;
+        return DS18B20_DISCONNECTED;
     }
 
     uint8_t searchMode = alarmSearchMode ? DS18B20_ALARM_SEARCH : DS18B20_SEARCH_ROM;
@@ -180,12 +195,12 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bo
 
             if (bitRead && complementRead)
             {   // No devices connected to bus (data: 11)
-                // FIXME: two different errors
-                if (DS18B20_OK != ds18b20_restart_search(onewire, alarmSearchMode))
+                status = ds18b20_restart_search(onewire, alarmSearchMode);
+                if (DS18B20_OK != status)
                 {
-                    return DS18B20_ERR;
+                    return status;
                 }
-                return DS18B20_ERR;
+                return DS18B20_NO_DEVICES;
             }
 
             if (!bitRead && !complementRead)
@@ -235,11 +250,11 @@ uint8_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bo
     return DS18B20_OK;
 }
 
-uint8_t ds18b20_read_rom(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_read_rom(DS18B20_onewire_t *onewire)
 {
     if (!ds18b20_reset(onewire))
     {
-        return DS18B20_ERR;
+        return DS18B20_DISCONNECTED;
     }
 
     ds18b20_write_byte(onewire, DS18B20_READ_ROM);
@@ -249,14 +264,18 @@ uint8_t ds18b20_read_rom(DS18B20_onewire_t *onewire)
         onewire->devices->rom[i] = ds18b20_read_byte(onewire);
     }
 
-    return ds18b20_reset(onewire);
+    if (!ds18b20_reset(onewire))
+    {
+        return DS18B20_DISCONNECTED;
+    }
+    return DS18B20_OK;
 }
 
-uint8_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
     if (!ds18b20_reset(onewire))
     {
-        return DS18B20_ERR;
+        return DS18B20_DISCONNECTED;
     }
 
     ds18b20_write_byte(onewire, DS18B20_MATCH_ROM);
@@ -268,11 +287,11 @@ uint8_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex)
     return DS18B20_OK;
 }
 
-uint8_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
 {
     if (!ds18b20_reset(onewire))
     {
-        return DS18B20_ERR;
+        return DS18B20_DISCONNECTED;
     }
     
     ds18b20_write_byte(onewire, DS18B20_SKIP_ROM);
@@ -280,8 +299,13 @@ uint8_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
     return DS18B20_OK;
 }
 
-void ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+    
     uint8_t isParasite = DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode;
     if (!isParasite)
     {
@@ -294,23 +318,37 @@ void ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex)
             ds18b20_parasite_start_pullup(onewire);
         interrupts();
     }
+
+    return DS18B20_OK;
 }
 
-void ds18b20_write_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_write_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+
     ds18b20_write_byte(onewire, DS18B20_WRITE_SCRATCHPAD);
     ds18b20_write_byte(onewire, onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_HIGH_BYTE]);
     ds18b20_write_byte(onewire, onewire->devices[deviceIndex].scratchpad[DS18B20_SP_TEMP_LOW_BYTE]);
     ds18b20_write_byte(onewire, onewire->devices[deviceIndex].scratchpad[DS18B20_SP_CONFIG_BYTE]);
+
+    return DS18B20_OK;
 }
 
-uint8_t ds18b20_read_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_read_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
     return ds18b20_read_scratchpad_with_stop(onewire, deviceIndex, DS18B20_SP_SIZE);
 }
 
-uint8_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead)
+DS18B20_error_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+
     if (bytesToRead > DS18B20_SP_SIZE)
     {
         bytesToRead = DS18B20_SP_SIZE;
@@ -323,11 +361,20 @@ uint8_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t dev
         onewire->devices[deviceIndex].scratchpad[i] = ds18b20_read_byte(onewire);
     }
 
-    return ds18b20_reset(onewire);
+    if (!ds18b20_reset(onewire))
+    {
+        return DS18B20_DISCONNECTED;
+    }
+    return DS18B20_OK;
 }
 
-void ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+
     uint8_t isParasite = DS18B20_PM_PARASITE == onewire->devices[deviceIndex].powerMode;
     if (!isParasite)
     {
@@ -340,20 +387,49 @@ void ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
             ds18b20_parasite_start_pullup(onewire);
         interrupts();
     }
+
+    return DS18B20_OK;
 }
 
-void ds18b20_recall_e2(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_recall_e2(DS18B20_onewire_t *onewire)
 {
+    if (!onewire)
+    {
+        return DS18B20_INV_ARG;
+    }
+
     ds18b20_write_byte(onewire, DS18B20_RECALL_E2);
+
+    return DS18B20_OK;
 }
 
-DS18B20_powermode_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+    
     ds18b20_write_byte(onewire, DS18B20_READ_POWER_SUPPLY);
 
-    DS18B20_powermode_t powerMode = ds18b20_read_bit(onewire);
-    onewire->devices[deviceIndex].powerMode = powerMode;
-    return powerMode;
+    onewire->devices[deviceIndex].powerMode = ds18b20_read_bit(onewire);
+    
+    return DS18B20_OK;
+}
+
+DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode)
+{
+    if (!onewire)
+    {
+        return DS18B20_INV_ARG;
+    }
+
+    onewire->lastSearchedDeviceNumber = DS18B20_NO_SEARCHED_DEVICES;
+    onewire->lastSearchConflictUnresolved = DS18B20_NO_SEARCH_CONFLICTS;
+    onewire->lastSearchConflict = DS18B20_NO_SEARCH_CONFLICTS;
+    onewire->alarmSearchMode = alarmSearchMode;
+
+    return DS18B20_OK;
 }
 
 uint16_t ds18b20_millis_to_wait_for_convertion(DS18B20_resolution_t resolution)

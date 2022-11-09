@@ -1,7 +1,19 @@
 #ifndef DS18B20_ERROR_CODES_H
 #define DS18B20_ERROR_CODES_H
 
-#define DS18B20_OK          1
-#define DS18B20_ERR         0
+typedef enum DS18B20_error_t    DS18B20_error_t;
+
+enum DS18B20_error_t
+{
+    DS18B20_OK                  = 0,
+    DS18B20_INV_ARG,
+    DS18B20_INV_CONF,
+    DS18B20_INV_OP,
+    DS18B20_NO_MORE_DEVICES,
+    DS18B20_NO_DEVICES,
+    DS18B20_DISCONNECTED,
+    DS18B20_DEVICE_NOT_FOUND,
+    DS18B20_CRC_FAIL,
+};
 
 #endif /* DS18B20_ERROR_CODES_H */
