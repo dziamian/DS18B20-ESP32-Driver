@@ -11,6 +11,6 @@
 #define DS18B20_ROM_SIZE_TO_VALIDATE         7
 #define DS18B20_SP_SIZE_TO_VALIDATE          8
 
-DS18B20_error_t ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t polynomialWithoutMsb, uint8_t crcValue);
+DS18B20_error_t ds18b20_validate_crc8(const uint8_t * const data, const size_t dataSize, const uint8_t polynomialWithoutMsb, const uint8_t crcValue);
 
 #endif /* DS18B20_VALIDATOR_H */

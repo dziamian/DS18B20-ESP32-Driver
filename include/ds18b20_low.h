@@ -18,52 +18,52 @@ typedef int16_t                             DS18B20_gpio_t;
 typedef uint8_t                             DS18B20_rom_t[DS18B20_ROM_SIZE];
 typedef uint8_t                             DS18B20_scratchpad_t[DS18B20_SP_SIZE];
 
-struct DS18B20_onewire_t
-{
-    DS18B20_gpio_t          bus;
-    DS18B20_t               *devices;
-    size_t                  devicesNo;
-
-    size_t                  lastSearchedDeviceNumber; 
-    int8_t                  lastSearchConflictUnresolved;
-    int8_t                  lastSearchConflict;
-    bool                    alarmSearchMode;
-};
-
 struct DS18B20_t
 {
-    DS18B20_rom_t           rom;
-    DS18B20_scratchpad_t    scratchpad;
-    DS18B20_resolution_t    resolution;
-    DS18B20_powermode_t     powerMode;
+    DS18B20_rom_t                           rom;
+    DS18B20_scratchpad_t                    scratchpad;
+    DS18B20_resolution_t                    resolution;
+    DS18B20_powermode_t                     powerMode;
+};
+
+struct DS18B20_onewire_t
+{
+    DS18B20_gpio_t                          bus;
+    DS18B20_t                               *devices;
+    size_t                                  devicesNo;
+
+    size_t                                  lastSearchedDeviceNumber; 
+    int8_t                                  lastSearchConflictUnresolved;
+    int8_t                                  lastSearchConflict;
+    bool                                    alarmSearchMode;
 };
 
 /* Basic functions */
-void ds18b20_write_bit(DS18B20_onewire_t *onewire, uint8_t bit);
-void ds18b20_write_byte(DS18B20_onewire_t *onewire, uint8_t byte);
-uint8_t ds18b20_read_bit(DS18B20_onewire_t *onewire);
-uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire);
-uint8_t ds18b20_reset(DS18B20_onewire_t *onewire);
-void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire);
-void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire);
+void ds18b20_write_bit(const DS18B20_onewire_t * const onewire, const uint8_t bit);
+void ds18b20_write_byte(const DS18B20_onewire_t * const onewire, const uint8_t byte);
+uint8_t ds18b20_read_bit(const DS18B20_onewire_t * const onewire);
+uint8_t ds18b20_read_byte(const DS18B20_onewire_t * const onewire);
+uint8_t ds18b20_reset(const DS18B20_onewire_t * const onewire);
+void ds18b20_parasite_start_pullup(const DS18B20_onewire_t * const onewire);
+void ds18b20_parasite_end_pullup(const DS18B20_onewire_t * const onewire);
 
 /* ROM commands */
-DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode);
-DS18B20_error_t ds18b20_read_rom(DS18B20_onewire_t *onewire);
-DS18B20_error_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex);
-DS18B20_error_t ds18b20_skip_select(DS18B20_onewire_t *onewire);
+DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t * const onewire, DS18B20_rom_t * buffer, const bool alarmSearchMode);
+DS18B20_error_t ds18b20_read_rom(const DS18B20_onewire_t * const onewire);
+DS18B20_error_t ds18b20_select(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+DS18B20_error_t ds18b20_skip_select(const DS18B20_onewire_t * const onewire);
 
 /* Function commands */
-DS18B20_error_t ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex);
-DS18B20_error_t ds18b20_write_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex);
-DS18B20_error_t ds18b20_read_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex);
-DS18B20_error_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead);
-DS18B20_error_t ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex);
-DS18B20_error_t ds18b20_recall_e2(DS18B20_onewire_t *onewire);
-DS18B20_error_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex);
+DS18B20_error_t ds18b20_convert_temperature(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+DS18B20_error_t ds18b20_write_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+DS18B20_error_t ds18b20_read_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+DS18B20_error_t ds18b20_read_scratchpad_with_stop(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint8_t bytesToRead);
+DS18B20_error_t ds18b20_copy_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+DS18B20_error_t ds18b20_recall_e2(const DS18B20_onewire_t * const onewire);
+DS18B20_error_t ds18b20_read_powermode(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
 
 /* Helpers */
-DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode);
-uint16_t ds18b20_millis_to_wait_for_convertion(DS18B20_resolution_t resolution);
+DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t * const onewire, const bool alarmSearchMode);
+uint16_t ds18b20_millis_to_wait_for_convertion(const DS18B20_resolution_t resolution);
 
 #endif /* DS18B20_LOW_H */

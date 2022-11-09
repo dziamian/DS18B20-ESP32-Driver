@@ -20,15 +20,15 @@
 #define DS18B20_READ_TEMPERATURE_BYTES          2
 #define DS18B20_READ_CONFIGURATION_BYTES        5
 
-static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPeriodMs, uint16_t checkPeriodMs);
-static DS18B20_error_t ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum);
-static DS18B20_error_t ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum);
-static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum);
-static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum);
-static DS18B20_error_t ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex);
-static DS18B20_error_t ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs);
+static void ds18b20_waitWithChecking(const DS18B20_onewire_t * const onewire, uint16_t waitPeriodMs, const uint16_t checkPeriodMs);
+static DS18B20_error_t ds18b20_readRegisters(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, const uint8_t bytesToRead, const bool checksum);
+static DS18B20_error_t ds18b20_readRom(const DS18B20_onewire_t * const onewire, const bool checksum);
+static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t * const onewire, const size_t deviceIndex, const bool checksum);
+static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t * const onewire, DS18B20_rom_t * buffer, const bool checksum);
+static DS18B20_error_t ds18b20_selectDevice(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+static DS18B20_error_t ds18b20_requestTemperature(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs);
 
-DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t bus, DS18B20_t *devices, size_t devicesNo, bool checksum)
+DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t * const onewire, const DS18B20_gpio_t bus, DS18B20_t * const devices, const size_t devicesNo, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || !devices || !devicesNo)
@@ -116,7 +116,7 @@ DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t *onewire, DS18B20_gpio_t 
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__InitConfigDefault(DS18B20_config_t *config)
+DS18B20_error_t ds18b20__InitConfigDefault(DS18B20_config_t * const config)
 {
     if (!config)
     {
@@ -130,7 +130,7 @@ DS18B20_error_t ds18b20__InitConfigDefault(DS18B20_config_t *config)
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__RequestTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20__RequestTemperatureC(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
@@ -147,12 +147,12 @@ DS18B20_error_t ds18b20__RequestTemperatureC(DS18B20_onewire_t *onewire, size_t 
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__GetTemperatureC(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, bool checksum)
+DS18B20_error_t ds18b20__GetTemperatureC(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, DS18B20_temperature_out_t * const temperatureOut, const bool checksum)
 {
     return ds18b20__GetTemperatureCWithChecking(onewire, deviceIndex, temperatureOut, DS18B20_NO_CHECK_PERIOD, checksum);
 }
 
-DS18B20_error_t ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_temperature_out_t *temperatureOut, uint16_t checkPeriodMs, bool checksum)
+DS18B20_error_t ds18b20__GetTemperatureCWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, DS18B20_temperature_out_t * const temperatureOut, uint16_t checkPeriodMs, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo || !temperatureOut)
@@ -186,7 +186,7 @@ DS18B20_error_t ds18b20__GetTemperatureCWithChecking(DS18B20_onewire_t *onewire,
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__Configure(DS18B20_onewire_t *onewire, size_t deviceIndex, DS18B20_config_t *config, bool checksum)
+DS18B20_error_t ds18b20__Configure(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, const DS18B20_config_t * const config, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
@@ -223,7 +223,7 @@ DS18B20_error_t ds18b20__Configure(DS18B20_onewire_t *onewire, size_t deviceInde
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__FindNextAlarm(DS18B20_onewire_t *onewire, size_t *deviceIndexOut, bool checksum)
+DS18B20_error_t ds18b20__FindNextAlarm(DS18B20_onewire_t * const onewire, size_t * const deviceIndexOut, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || !deviceIndexOut)
@@ -261,12 +261,12 @@ DS18B20_error_t ds18b20__FindNextAlarm(DS18B20_onewire_t *onewire, size_t *devic
     return DS18B20_DEVICE_NOT_FOUND;
 }
 
-DS18B20_error_t ds18b20__StoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20__StoreRegisters(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     return ds18b20__StoreRegistersWithChecking(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
 }
 
-DS18B20_error_t ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
+DS18B20_error_t ds18b20__StoreRegistersWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs)
 {
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
@@ -309,12 +309,12 @@ DS18B20_error_t ds18b20__StoreRegistersWithChecking(DS18B20_onewire_t *onewire, 
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20__RestoreRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
+DS18B20_error_t ds18b20__RestoreRegisters(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, const bool checksum)
 {
     return ds18b20__RestoreRegistersWithChecking(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD, checksum);
 }
 
-DS18B20_error_t ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs, bool checksum)
+DS18B20_error_t ds18b20__RestoreRegistersWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
@@ -359,7 +359,7 @@ DS18B20_error_t ds18b20__RestoreRegistersWithChecking(DS18B20_onewire_t *onewire
     return DS18B20_OK;
 }
 
-static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPeriodMs, uint16_t checkPeriodMs)
+static void ds18b20_waitWithChecking(const DS18B20_onewire_t * const onewire, uint16_t waitPeriodMs, const uint16_t checkPeriodMs)
 {
     while (true)
     {
@@ -374,7 +374,7 @@ static void ds18b20_waitWithChecking(DS18B20_onewire_t *onewire, uint16_t waitPe
     }
 }
 
-static DS18B20_error_t ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead, bool checksum)
+static DS18B20_error_t ds18b20_readRegisters(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, const uint8_t bytesToRead, const bool checksum)
 {
     DS18B20_error_t status = ds18b20_read_scratchpad_with_stop(onewire, deviceIndex, bytesToRead);
     if (DS18B20_OK != status)
@@ -396,7 +396,7 @@ static DS18B20_error_t ds18b20_readRegisters(DS18B20_onewire_t *onewire, size_t 
     return DS18B20_OK;
 }
 
-static DS18B20_error_t ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum)
+static DS18B20_error_t ds18b20_readRom(const DS18B20_onewire_t * const onewire, const bool checksum)
 {
     DS18B20_error_t status = ds18b20_read_rom(onewire);
     if (DS18B20_OK != status)
@@ -413,7 +413,7 @@ static DS18B20_error_t ds18b20_readRom(DS18B20_onewire_t *onewire, bool checksum
     return DS18B20_OK;
 }
 
-static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t deviceIndex, bool checksum)
+static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t * const onewire, const size_t deviceIndex, const bool checksum)
 {
     DS18B20_error_t status = ds18b20_search_rom(onewire, NULL, false);
     if (DS18B20_OK != status)
@@ -430,7 +430,7 @@ static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t *onewire, size_t devi
     return DS18B20_OK;
 }
 
-static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool checksum)
+static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t * const onewire, DS18B20_rom_t * buffer, const bool checksum)
 {
     DS18B20_error_t status = ds18b20_search_rom(onewire, buffer, true);
     if (DS18B20_OK != status)
@@ -447,7 +447,7 @@ static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t *onewire, DS18B20_r
     return DS18B20_OK;
 }
 
-static DS18B20_error_t ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t deviceIndex)
+static DS18B20_error_t ds18b20_selectDevice(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     DS18B20_error_t status;
     if (DS18B20_1W_SINGLEDEVICE != onewire->devicesNo)
@@ -470,7 +470,7 @@ static DS18B20_error_t ds18b20_selectDevice(DS18B20_onewire_t *onewire, size_t d
     return DS18B20_OK;
 }
 
-static DS18B20_error_t ds18b20_requestTemperature(DS18B20_onewire_t *onewire, size_t deviceIndex, uint16_t checkPeriodMs)
+static DS18B20_error_t ds18b20_requestTemperature(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs)
 {
     DS18B20_error_t status;
     uint16_t waitPeriodMs = ds18b20_millis_to_wait_for_convertion(onewire->devices[deviceIndex].resolution);

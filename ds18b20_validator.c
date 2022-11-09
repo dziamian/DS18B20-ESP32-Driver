@@ -10,9 +10,9 @@
 #define DS18B20_LSB_1BYTE_MASK          0x01
 #define DS18B20_DISCARD_LSB_SHIFT_VALUE 1
 
-static void ds18b20_discard_lsb(uint8_t *data, size_t dataSize);
+static void ds18b20_discard_lsb(uint8_t * const data, const size_t dataSize);
 
-DS18B20_error_t ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t polynomialWithoutMsb, uint8_t crcValue)
+DS18B20_error_t ds18b20_validate_crc8(const uint8_t * const data, const size_t dataSize, const uint8_t polynomialWithoutMsb, const uint8_t crcValue)
 {
     uint8_t *dataCopy = malloc(dataSize);
     memcpy(dataCopy, data, dataSize);
@@ -38,7 +38,7 @@ DS18B20_error_t ds18b20_validate_crc8(uint8_t *data, size_t dataSize, uint8_t po
     return status;
 }
 
-static void ds18b20_discard_lsb(uint8_t *data, size_t dataSize)
+static void ds18b20_discard_lsb(uint8_t * const data, const size_t dataSize)
 {
     *data >>= DS18B20_DISCARD_LSB_SHIFT_VALUE;
 

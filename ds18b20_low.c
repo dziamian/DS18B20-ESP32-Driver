@@ -20,7 +20,7 @@
 #define noInterrupts()              portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;taskENTER_CRITICAL(&mux)
 #define interrupts()                taskEXIT_CRITICAL(&mux)
 
-static uint16_t resolution_delays_ms[DS18B20_RESOLUTION_COUNT] =
+static const uint16_t resolution_delays_ms[DS18B20_RESOLUTION_COUNT] =
 {
     [DS18B20_RESOLUTION_09] DS18B20_RESOLUTION_09_DELAY_MS,
     [DS18B20_RESOLUTION_10] DS18B20_RESOLUTION_10_DELAY_MS,
@@ -28,7 +28,7 @@ static uint16_t resolution_delays_ms[DS18B20_RESOLUTION_COUNT] =
     [DS18B20_RESOLUTION_12] DS18B20_RESOLUTION_12_DELAY_MS
 };
 
-void ds18b20_write_bit(DS18B20_onewire_t *onewire, uint8_t bit)
+void ds18b20_write_bit(const DS18B20_onewire_t * const onewire, const uint8_t bit)
 {
     if (!onewire)
     {
@@ -45,7 +45,7 @@ void ds18b20_write_bit(DS18B20_onewire_t *onewire, uint8_t bit)
     interrupts();
 }
 
-void ds18b20_write_byte(DS18B20_onewire_t *onewire, uint8_t byte)
+void ds18b20_write_byte(const DS18B20_onewire_t * const onewire, const uint8_t byte)
 {
     for (uint8_t mask = 1; mask != 0; mask <<= 1)
     {
@@ -53,7 +53,7 @@ void ds18b20_write_byte(DS18B20_onewire_t *onewire, uint8_t byte)
     }
 }
 
-uint8_t ds18b20_read_bit(DS18B20_onewire_t *onewire)
+uint8_t ds18b20_read_bit(const DS18B20_onewire_t * const onewire)
 {
     if (!onewire)
     {
@@ -74,7 +74,7 @@ uint8_t ds18b20_read_bit(DS18B20_onewire_t *onewire)
     return data;
 }
 
-uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire)
+uint8_t ds18b20_read_byte(const DS18B20_onewire_t * const onewire)
 {
     uint8_t data = 0;
 
@@ -89,7 +89,7 @@ uint8_t ds18b20_read_byte(DS18B20_onewire_t *onewire)
     return data;
 }
 
-uint8_t ds18b20_reset(DS18B20_onewire_t *onewire)
+uint8_t ds18b20_reset(const DS18B20_onewire_t * const onewire)
 {
     if (!onewire)
     {
@@ -111,7 +111,7 @@ uint8_t ds18b20_reset(DS18B20_onewire_t *onewire)
     return presence;
 }
 
-void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire)
+void ds18b20_parasite_start_pullup(const DS18B20_onewire_t * const onewire)
 {
     if (!onewire)
     {
@@ -122,7 +122,7 @@ void ds18b20_parasite_start_pullup(DS18B20_onewire_t *onewire)
     gpio_set_level(onewire->bus, DS18B20_LEVEL_HIGH);
 }
 
-void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire)
+void ds18b20_parasite_end_pullup(const DS18B20_onewire_t * const onewire)
 {
     if (!onewire)
     {
@@ -132,7 +132,7 @@ void ds18b20_parasite_end_pullup(DS18B20_onewire_t *onewire)
     gpio_set_direction(onewire->bus, GPIO_MODE_INPUT);
 }
 
-DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *buffer, bool alarmSearchMode)
+DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t * const onewire, DS18B20_rom_t * buffer, const bool alarmSearchMode)
 {
     DS18B20_error_t status;
     if (!onewire)
@@ -250,7 +250,7 @@ DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t *onewire, DS18B20_rom_t *bu
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_read_rom(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_read_rom(const DS18B20_onewire_t * const onewire)
 {
     if (!ds18b20_reset(onewire))
     {
@@ -271,7 +271,7 @@ DS18B20_error_t ds18b20_read_rom(DS18B20_onewire_t *onewire)
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_select(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     if (!ds18b20_reset(onewire))
     {
@@ -287,7 +287,7 @@ DS18B20_error_t ds18b20_select(DS18B20_onewire_t *onewire, size_t deviceIndex)
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_skip_select(const DS18B20_onewire_t * const onewire)
 {
     if (!ds18b20_reset(onewire))
     {
@@ -299,7 +299,7 @@ DS18B20_error_t ds18b20_skip_select(DS18B20_onewire_t *onewire)
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_convert_temperature(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
@@ -322,7 +322,7 @@ DS18B20_error_t ds18b20_convert_temperature(DS18B20_onewire_t *onewire, size_t d
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_write_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_write_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
@@ -337,12 +337,12 @@ DS18B20_error_t ds18b20_write_scratchpad(DS18B20_onewire_t *onewire, size_t devi
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_read_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_read_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     return ds18b20_read_scratchpad_with_stop(onewire, deviceIndex, DS18B20_SP_SIZE);
 }
 
-DS18B20_error_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, size_t deviceIndex, uint8_t bytesToRead)
+DS18B20_error_t ds18b20_read_scratchpad_with_stop(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint8_t bytesToRead)
 {
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
@@ -368,7 +368,7 @@ DS18B20_error_t ds18b20_read_scratchpad_with_stop(DS18B20_onewire_t *onewire, si
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_copy_scratchpad(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
@@ -391,7 +391,7 @@ DS18B20_error_t ds18b20_copy_scratchpad(DS18B20_onewire_t *onewire, size_t devic
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_recall_e2(DS18B20_onewire_t *onewire)
+DS18B20_error_t ds18b20_recall_e2(const DS18B20_onewire_t * const onewire)
 {
     if (!onewire)
     {
@@ -403,7 +403,7 @@ DS18B20_error_t ds18b20_recall_e2(DS18B20_onewire_t *onewire)
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t deviceIndex)
+DS18B20_error_t ds18b20_read_powermode(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
@@ -417,7 +417,7 @@ DS18B20_error_t ds18b20_read_powermode(DS18B20_onewire_t *onewire, size_t device
     return DS18B20_OK;
 }
 
-DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSearchMode)
+DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t * const onewire, const bool alarmSearchMode)
 {
     if (!onewire)
     {
@@ -432,7 +432,7 @@ DS18B20_error_t ds18b20_restart_search(DS18B20_onewire_t *onewire, bool alarmSea
     return DS18B20_OK;
 }
 
-uint16_t ds18b20_millis_to_wait_for_convertion(DS18B20_resolution_t resolution)
+uint16_t ds18b20_millis_to_wait_for_convertion(const DS18B20_resolution_t resolution)
 {
     return resolution_delays_ms[resolution];
 }
