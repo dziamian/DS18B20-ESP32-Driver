@@ -5,18 +5,26 @@
 #include <stddef.h>
 #include <stdbool.h>
 
-#include "ds18b20_types.h"
+#include "ds18b20_types_req.h"
 #include "ds18b20_error_codes.h"
 
 #define DS18B20_ROM_SIZE    8
 #define DS18B20_SP_SIZE     9
 
+typedef enum    DS18B20_powermode_t         DS18B20_powermode_t;
 typedef struct  DS18B20_onewire_t           DS18B20_onewire_t;
 typedef struct  DS18B20_t                   DS18B20_t;
 
 typedef int16_t                             DS18B20_gpio_t;
 typedef uint8_t                             DS18B20_rom_t[DS18B20_ROM_SIZE];
 typedef uint8_t                             DS18B20_scratchpad_t[DS18B20_SP_SIZE];
+
+enum DS18B20_powermode_t
+{
+    DS18B20_PM_PARASITE = 0,
+    DS18B20_PM_EXTERNAL_SUPPLY,
+    DS18B20_PM_COUNT
+};
 
 struct DS18B20_t
 {

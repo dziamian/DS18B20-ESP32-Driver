@@ -4,6 +4,7 @@
 #include <stdbool.h>
 
 #include "ds18b20_low.h"
+#include "ds18b20_types_res.h"
 #include "ds18b20_error_codes.h"
 
 #define DS18B20_NO_CHECK_PERIOD 0
