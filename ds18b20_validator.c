@@ -6,14 +6,21 @@
 
 #include "ds18b20_helpers.h"
 
-#define DS18B20_MSB_1BYTE_MASK          0x80
-#define DS18B20_LSB_1BYTE_MASK          0x01
-#define DS18B20_DISCARD_LSB_SHIFT_VALUE 1
+#define DS18B20_MSB_1BYTE_MASK          0x80 /**< Mask value intended to get the most significant bit */
+#define DS18B20_LSB_1BYTE_MASK          0x01 /**< Mask value intended to get the least significant bit */
+#define DS18B20_DISCARD_LSB_SHIFT_VALUE 1    /**< Value for shifting the least significant bit to discard it */
 
+/**
+ * @brief Discards the least significant bit of the first data byte and shifts all remaining bits to the vacated positions.
+ * 
+ * @param data Pointer to data bytes to be modified
+ * @param dataSize Size of the data
+ */
 static void ds18b20_discard_lsb(uint8_t * const data, const size_t dataSize);
 
 DS18B20_error_t ds18b20_validate_crc8(const uint8_t * const data, const size_t dataSize, const uint8_t polynomialWithoutMsb, const uint8_t crcValue)
 {
+    // Copy data so the original will not be modified
     uint8_t *dataCopy = malloc(dataSize);
     memcpy(dataCopy, data, dataSize);
     

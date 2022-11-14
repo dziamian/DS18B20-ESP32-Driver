@@ -11,15 +11,22 @@
 #include "ds18b20_timeslots.h"
 #include "ds18b20_helpers.h"
 
+/** Means that no devices has been found yet during search procedure */
 #define DS18B20_NO_SEARCHED_DEVICES 0
+/** Means that no conflicts occurred during the last search cycle */
 #define DS18B20_NO_SEARCH_CONFLICTS -1
 
+/** Means that bit was read incorrectly */
 #define DS18B20_INVALID_READ        2
+/** Means that DS18B20 device did not replied to the reset signal */
 #define DS18B20_ABSENCE             0
 
+/** Macro which disables FreeRTOS interrupts */
 #define noInterrupts()              portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;taskENTER_CRITICAL(&mux)
+/** Macro which enables back FreeRTOS interrupts */
 #define interrupts()                taskEXIT_CRITICAL(&mux)
 
+/** Look-up table for maximum temperature convertion waiting time and resolutions */
 static const uint16_t resolution_delays_ms[DS18B20_RESOLUTION_COUNT] =
 {
     [DS18B20_RESOLUTION_09] DS18B20_RESOLUTION_09_DELAY_MS,
@@ -100,12 +107,12 @@ uint8_t ds18b20_reset(const DS18B20_onewire_t * const onewire)
     
     noInterrupts();
         gpio_set_level(onewire->bus, DS18B20_LEVEL_LOW);
-        ets_delay_us(RESET_DELAY0);
+        ets_delay_us(RESET_DELAY0_US);
         gpio_set_level(onewire->bus, DS18B20_LEVEL_HIGH);
         gpio_set_direction(onewire->bus, GPIO_MODE_INPUT);
-        ets_delay_us(RESET_DELAY1);
+        ets_delay_us(RESET_DELAY1_US);
         uint8_t presence = !gpio_get_level(onewire->bus);
-        ets_delay_us(RESET_DELAY2);
+        ets_delay_us(RESET_DELAY2_US);
     interrupts();
 
     return presence;
@@ -252,6 +259,16 @@ DS18B20_error_t ds18b20_search_rom(DS18B20_onewire_t * const onewire, DS18B20_ro
 
 DS18B20_error_t ds18b20_read_rom(const DS18B20_onewire_t * const onewire)
 {
+    if (!onewire)
+    {
+        return DS18B20_INV_ARG;
+    }
+
+    if (onewire->devicesNo > DS18B20_1W_SINGLEDEVICE)
+    {
+        return DS18B20_INV_OP;
+    }
+
     if (!ds18b20_reset(onewire))
     {
         return DS18B20_DISCONNECTED;
@@ -273,6 +290,11 @@ DS18B20_error_t ds18b20_read_rom(const DS18B20_onewire_t * const onewire)
 
 DS18B20_error_t ds18b20_select(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
+    if (!onewire || deviceIndex >= onewire->devicesNo)
+    {
+        return DS18B20_INV_ARG;
+    }
+
     if (!ds18b20_reset(onewire))
     {
         return DS18B20_DISCONNECTED;
@@ -289,6 +311,16 @@ DS18B20_error_t ds18b20_select(const DS18B20_onewire_t * const onewire, const si
 
 DS18B20_error_t ds18b20_skip_select(const DS18B20_onewire_t * const onewire)
 {
+    if (!onewire)
+    {
+        return DS18B20_INV_ARG;
+    }
+
+    if (onewire->devicesNo > DS18B20_1W_SINGLEDEVICE)
+    {
+        return DS18B20_INV_OP;
+    }
+
     if (!ds18b20_reset(onewire))
     {
         return DS18B20_DISCONNECTED;

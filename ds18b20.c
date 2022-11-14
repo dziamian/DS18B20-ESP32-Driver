@@ -11,24 +11,96 @@
 #include "ds18b20_converter.h"
 #include "ds18b20_validator.h"
 
-#define DS18B20_1W_SINGLEDEVICE                 1
+#define DS18B20_DEFAULT_VALUE                   0   /**< Default memory initialization value */
+#define DS18B20_WAITING_END                     0   /**< A value specifying the end of the wait for operation to finish */
 
-#define DS18B20_DEFAULT_VALUE                   0
-#define DS18B20_CHECK_PERIOD_MIN_MS             10
-#define DS18B20_WAITING_END                     0
+#define DS18B20_READ_TEMPERATURE_BYTES          2   /**< Specifies how many bytes are required to read to get measured temperature */
+#define DS18B20_READ_CONFIGURATION_BYTES        5   /**< Specifies how many bytes are required to read to get configuration of the device */
 
-#define DS18B20_READ_TEMPERATURE_BYTES          2
-#define DS18B20_READ_CONFIGURATION_BYTES        5
-
+/**
+ * @brief Waits for DS18B20 operation to end with periodically checking its status.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param waitPeriodMs Specifies what is the maximum operation time to wait for (in milliseconds)
+ * @param checkPeriodMs Specifies how often the status of the specified operation will be checked (in milliseconds)
+ */
 static void ds18b20_waitWithChecking(const DS18B20_onewire_t * const onewire, uint16_t waitPeriodMs, const uint16_t checkPeriodMs);
+
+/**
+ * @brief Reads specified number of bytes from selected device scratchpad memory.
+ * 
+ * Optionally, validates received data from the One-Wire line with CRC checksum.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param deviceIndex Index of the selected device
+ * @param bytesToRead Number of bytes to read
+ * @param checksum Specifies if CRC checksum should be calculated during all performed operations
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_readRegisters(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, const uint8_t bytesToRead, const bool checksum);
+
+/**
+ * @brief Reads ROM address of the found device.
+ * 
+ * Optionally, validates received data from the One-Wire line with CRC checksum.
+ * This method should be called only if one device is connected to the One-Wire bus!
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param checksum Specifies if CRC checksum should be calculated during all performed operations
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_readRom(const DS18B20_onewire_t * const onewire, const bool checksum);
+
+/**
+ * @brief Reads ROM address of the next found device.
+ * 
+ * Performs the next cycle of the search procedure.
+ * Optionally, validates received data from the One-Wire line with CRC checksum.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param deviceIndex Index of the selected device
+ * @param checksum Specifies if CRC checksum should be calculated during all performed operations
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_searchRom(DS18B20_onewire_t * const onewire, const size_t deviceIndex, const bool checksum);
+
+/**
+ * @brief Reads ROM address of the next found device whose last measured temperature is within the specified alarm range.
+ * 
+ * Performs the next cycle of the search procedure.
+ * Optionally, validates received data from the One-Wire line with CRC checksum.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param buffer Pointer to buffer instance where found ROM address will be saved
+ * @param checksum Specifies if CRC checksum should be calculated during all performed operations
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_searchAlarm(DS18B20_onewire_t * const onewire, DS18B20_rom_t * buffer, const bool checksum);
+
+/**
+ * @brief Selects specified device to communicate with on the One-Wire bus.
+ * 
+ * This method is required to call before using any of functional methods like converting temperature or reading registers.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param deviceIndex Index of the selected device
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_selectDevice(const DS18B20_onewire_t * const onewire, const size_t deviceIndex);
+
+/**
+ * @brief Only requests chosen DS18B20 for temperature convertion without reading its value while periodically checking if performing operation by the device has ended.
+ * 
+ * Waits until this operation has finished by periodically checking its status.
+ * 
+ * @param onewire Pointer to One-Wire bus characteristics instance
+ * @param deviceIndex Index of the selected device
+ * @param checkPeriodMs Specifies how often the status of the specified operation will be checked (in milliseconds)
+ * @return DS18B20_error_t Status code of the operation
+ */
 static DS18B20_error_t ds18b20_requestTemperature(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs);
 
-DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t * const onewire, const DS18B20_gpio_t bus, DS18B20_t * const devices, const size_t devicesNo, const bool checksum)
+DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t * const onewire, const int bus, DS18B20_t * const devices, const size_t devicesNo, const bool checksum)
 {
     DS18B20_error_t status;
     if (!onewire || !devices || !devicesNo)
@@ -132,13 +204,18 @@ DS18B20_error_t ds18b20__InitConfigDefault(DS18B20_config_t * const config)
 
 DS18B20_error_t ds18b20__RequestTemperatureC(const DS18B20_onewire_t * const onewire, const size_t deviceIndex)
 {
+    return ds18b20__RequestTemperatureCWithChecking(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
+}
+
+DS18B20_error_t ds18b20__RequestTemperatureCWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs)
+{
     DS18B20_error_t status;
     if (!onewire || deviceIndex >= onewire->devicesNo)
     {
         return DS18B20_INV_ARG;
     }
 
-    status = ds18b20_requestTemperature(onewire, deviceIndex, DS18B20_NO_CHECK_PERIOD);
+    status = ds18b20_requestTemperature(onewire, deviceIndex, checkPeriodMs);
     if (DS18B20_OK != status)
     {
         return status;
@@ -154,13 +231,7 @@ DS18B20_error_t ds18b20__GetTemperatureC(const DS18B20_onewire_t * const onewire
 
 DS18B20_error_t ds18b20__GetTemperatureCWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, DS18B20_temperature_out_t * const temperatureOut, uint16_t checkPeriodMs, const bool checksum)
 {
-    DS18B20_error_t status;
-    if (!onewire || deviceIndex >= onewire->devicesNo || !temperatureOut)
-    {
-        return DS18B20_INV_ARG;
-    }
-
-    status = ds18b20_requestTemperature(onewire, deviceIndex, checkPeriodMs);
+    DS18B20_error_t status = ds18b20__RequestTemperatureCWithChecking(onewire, deviceIndex, checkPeriodMs);
     if (DS18B20_OK != status)
     {
         return status;

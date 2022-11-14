@@ -2,20 +2,32 @@
 
 #include "ds18b20_registers.h"
 
+/** Default value (the lowest resolution) for converting resolution into configuration byte */
 #define DS18B20_CONFIG_BYTE_MASK                0x1F
+/** Value for shifting configuration bits to get or set the resolution */
 #define DS18B20_CONFIG_BYTE_CONVERTER_SHIFT     5
+/** Specifies which configuration bits mean resolution (after shifting) */
 #define DS18B20_CONFIG_BYTE_CONVERTER_MASK      0x03
 
+/** Base temperature value (0) after convertion when it came out negative */
 #define DS18B20_TEMP_CONVERTER_NEGATIVE_BASE    4096
+/** The most significant byte divider value for temperature convertion to get the number sign */
 #define DS18B20_TEMP_CONVERTER_MSB_DIVIDER      128
+/** The most significant byte multiplier value for temperature convertion to get human-readable result */
 #define DS18B20_TEMP_CONVERTER_MSB_MULTIPLIER   256
+/** The least significant byte divider value for temperature convertion to get human-readable result */
 #define DS18B20_TEMP_CONVERTER_LSB_DIVIDER      16
 
+/** Mask value intended to ignore temperature's undefined bits for resolution 09 */
 #define DS18B20_RESOLUTION_09_MASK              0xF8
+/** Mask value intended to ignore temperature's undefined bits for resolution 10 */
 #define DS18B20_RESOLUTION_10_MASK              0xFC
+/** Mask value intended to ignore temperature's undefined bits for resolution 11 */
 #define DS18B20_RESOLUTION_11_MASK              0xFE
+/** Mask value intended to ignore temperature's undefined bits for resolution 12 */
 #define DS18B20_RESOLUTION_12_MASK              0xFF
 
+/** Look-up table for temperature's undefined bits masks and resolutions */
 static const uint8_t resolution_masks[DS18B20_RESOLUTION_COUNT] =
 {
     [DS18B20_RESOLUTION_09] DS18B20_RESOLUTION_09_MASK,
@@ -26,6 +38,7 @@ static const uint8_t resolution_masks[DS18B20_RESOLUTION_COUNT] =
 
 DS18B20_temperature_out_t ds18b20_convert_temperature_bytes(const uint8_t msb, uint8_t lsb, const DS18B20_resolution_t resolution)
 {
+    // Ignore undefined bits for specified resolution
     lsb &= resolution_masks[resolution];
     return (DS18B20_temperature_out_t) 
                 ((int16_t) (lsb + (msb * DS18B20_TEMP_CONVERTER_MSB_MULTIPLIER))) 
