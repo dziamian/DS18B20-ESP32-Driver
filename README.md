@@ -11,8 +11,8 @@ It is written and tested for v4.4.2 of the [ESP-IDF](https://github.com/espressi
 To include the component into your ESP-IDF project, you need to create `CMakeLists.txt` file containing:
 ```cmake
 idf_component_register(
-    SRC_DIRS "ds18b20" 
-    INCLUDE_DIRS "ds18b20/include"
+    SRC_DIRS "DS18B20-ESP32-Driver" 
+    INCLUDE_DIRS "DS18B20-ESP32-Driver/include"
 )
 ```
 
