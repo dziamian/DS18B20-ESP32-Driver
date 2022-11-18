@@ -16,6 +16,8 @@ idf_component_register(
 )
 ```
 
+Consult [ESP-IDF documentation](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) for more details about build system.
+
 ## Features
 
 ✔️ Static memory allocation <br />
@@ -34,6 +36,8 @@ idf_component_register(
 ✔️ Optimized communication when only one device is connected to 1-Wire bus <br />
 
 ✔️ Supports CRC validations wherever possible <br />
+
+✔️ Supports measurement of temperature in Celsius <br />
 
 ✔️ Configurable resolutions of temperature measurements - 9, 10, 11 or 12 bits (changes decimal precision) <br />
 
