@@ -75,7 +75,7 @@ DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t * const onewire, const in
 /**
  * @brief Initializes configuration options of DS18B20 with the default values (power-on reset values).
  * 
- * For more details about default configuration of DS18B20 please check @see ds18b20_registers header file.
+ * For more details about default configuration of DS18B20 please check ds18b20_registers() header file.
  * 
  * @param config Pointer to device configuration instance to initialize
  * @return DS18B20_error_t Status code of the operation
@@ -102,8 +102,8 @@ DS18B20_error_t ds18b20__RequestTemperatureC(const DS18B20_onewire_t * const one
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device
  * @param checkPeriodMs Specifies how often the status of the temperature convertion will be checked (in milliseconds),
- * given value cannot be less than @see DS18B20_CHECK_PERIOD_MIN_MS,
- * value equals to @see DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
+ * given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS,
+ * value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
  * @return DS18B20_error_t Status code of the operation
  */
 DS18B20_error_t ds18b20__RequestTemperatureCWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs);
@@ -137,8 +137,8 @@ DS18B20_error_t ds18b20__GetTemperatureC(const DS18B20_onewire_t * const onewire
  * @param deviceIndex Index of the selected device
  * @param temperatureOut Pointer to variable where received temperature will be saved eventually
  * @param checkPeriodMs Specifies how often the status of the temperature convertion will be checked (in milliseconds),
- * given value cannot be less than @see DS18B20_CHECK_PERIOD_MIN_MS,
- * value equals to @see DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
+ * given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS,
+ * value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
  * @param checksum Specifies if CRC checksum should be calculated during all performed operations
  * @return DS18B20_error_t Status code of the operation
  */
@@ -150,7 +150,7 @@ DS18B20_error_t ds18b20__GetTemperatureCWithChecking(const DS18B20_onewire_t * c
  * Changes set configuration of chosen DS18B20 and acquires it from the memory.
  * Optionally, validates received data from the One-Wire line with CRC checksum.
  * All configuration options must be specified, because all of them will be written into DS18B20 memory.
- * In order to initialize them with default values, please use @see ds18b20__InitConfigDefault method.
+ * In order to initialize them with default values, please use ds18b20__InitConfigDefault() method.
  * 
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device
@@ -167,7 +167,7 @@ DS18B20_error_t ds18b20__Configure(const DS18B20_onewire_t * const onewire, cons
  * Optionally, validates received data (ROM address) from the One-Wire line with CRC checksum.
  * When no more or no devices have a temperature within the specified alarm range in their memory, 
  * then status code of the operation will indicate this with the proper value.
- * In order to request temperature for selected DS18B20, please use @see ds18b20__RequestTemperatureC or @see ds18b20__RequestTemperatureCWithChecking method.
+ * In order to request temperature for selected DS18B20, please use ds18b20__RequestTemperatureC() or ds18b20__RequestTemperatureCWithChecking() method.
  * 
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndexOut Pointer to variable where index of the found device will be saved eventually
@@ -201,8 +201,8 @@ DS18B20_error_t ds18b20__StoreRegisters(const DS18B20_onewire_t * const onewire,
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device
  * @param checkPeriodMs Specifies how often the status of copying data will be checked (in milliseconds),
- * given value cannot be less than @see DS18B20_CHECK_PERIOD_MIN_MS,
- * value equals to @see DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
+ * given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS,
+ * value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
  * @return DS18B20_error_t Status code of the operation
  */
 DS18B20_error_t ds18b20__StoreRegistersWithChecking(const DS18B20_onewire_t * const onewire, const size_t deviceIndex, uint16_t checkPeriodMs);
@@ -235,8 +235,8 @@ DS18B20_error_t ds18b20__RestoreRegisters(const DS18B20_onewire_t * const onewir
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device
  * @param checkPeriodMs Specifies how often the status of restoring data will be checked (in milliseconds),
- * given value cannot be less than @see DS18B20_CHECK_PERIOD_MIN_MS,
- * value equals to @see DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
+ * given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS,
+ * value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion
  * @param checksum Specifies if CRC checksum should be calculated during all performed operations
  * @return DS18B20_error_t Status code of the operation
  */

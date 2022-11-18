@@ -160,7 +160,7 @@ void ds18b20_parasite_end_pullup(const DS18B20_onewire_t * const onewire);
  * @brief Performs one cycle of the device or alarm searching procedure.
  * 
  * Found ROM address is saved in specified buffer or in the next One-Wire device characteristics internal buffer if it was not defined by the user. 
- * Before the first use @see ds18b20_restart_search call is required to initialize the internal search parameters.
+ * Before the first use ds18b20_restart_search() call is required to initialize the internal search parameters.
  * In alarm search mode, buffer need to be always specified by the user, otherwise the function will not be executed properly.
  * Search parameters are reset automatically when all search cycles have been performed or search mode has been changed.
  * 
@@ -186,7 +186,7 @@ DS18B20_error_t ds18b20_read_rom(const DS18B20_onewire_t * const onewire);
  * @brief Selects one device connected to One-Wire bus by sending its ROM address to the line.
  * 
  * This method is required to call before using any of functional commands like converting temperature.
- * In case when only one device is connected to the bus, @see ds18b20_skip_select method could be use instead.
+ * In case when only one device is connected to the bus, ds18b20_skip_select() method could be use instead.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device from One-Wire bus
@@ -199,7 +199,7 @@ DS18B20_error_t ds18b20_select(const DS18B20_onewire_t * const onewire, const si
  * 
  * This method is required to call before using any of functional commands like converting temperature.
  * This method can be used only if one device is connected to the One-Wire bus.
- * In any other cases, please use @see ds18b20_select method instead.
+ * In any other cases, please use ds18b20_select() method instead.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
  * @return DS18B20_error_t Status code of the operation
@@ -211,7 +211,7 @@ DS18B20_error_t ds18b20_skip_select(const DS18B20_onewire_t * const onewire);
 /**
  * @brief Sends a request for converting temperature to the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * If selected device is working in a parasite power mode, strong pullup will be enabled. 
  * In this specific case all interrupts are disabled while performing the operation.
  * 
@@ -224,7 +224,7 @@ DS18B20_error_t ds18b20_convert_temperature(const DS18B20_onewire_t * const onew
 /**
  * @brief Writes the scratchpad of the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * Only configurable bytes stored in the internal buffer of DS18B20 characteristics instance will be written to the device memory.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
@@ -236,9 +236,9 @@ DS18B20_error_t ds18b20_write_scratchpad(const DS18B20_onewire_t * const onewire
 /**
  * @brief Reads the all scratchpad memory from the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * All bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance.
- * If you want to read only part of the memory, please use @see ds18b20_read_scratchpad_with_stop method instead.
+ * If you want to read only part of the memory, please use ds18b20_read_scratchpad_with_stop() method instead.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
  * @param deviceIndex Index of the chosen device from One-Wire bus
@@ -249,7 +249,7 @@ DS18B20_error_t ds18b20_read_scratchpad(const DS18B20_onewire_t * const onewire,
 /**
  * @brief Reads the specified part of the scratchpad memory from the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * Only number of selected bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance.
  * The remaining bytes in the buffer will be unchanged.
  * 
@@ -263,7 +263,7 @@ DS18B20_error_t ds18b20_read_scratchpad_with_stop(const DS18B20_onewire_t * cons
 /**
  * @brief Sends a request for copying scratchpad into non-volatile EEPROM memory of the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * Only configurable bytes stored in device memory will be copied into its EEPROM.
  * If selected device is working in a parasite power mode, strong pullup will be enabled. 
  * In this specific case all interrupts are disabled while performing the operation.
@@ -277,7 +277,7 @@ DS18B20_error_t ds18b20_copy_scratchpad(const DS18B20_onewire_t * const onewire,
 /**
  * @brief Sends a request for recalling scratchpad from non-volatile EEPROM memory of the selected DS18B20.
  * 
- * Before calling this you need to select device by using one of these methods @see ds18b20_select or @see ds18b20_skip_select.
+ * Before calling this you need to select device by using one of these methods ds18b20_select() or ds18b20_skip_select().
  * Only configurable bytes stored in device EEPROM memory will be recalled.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
@@ -301,7 +301,7 @@ DS18B20_error_t ds18b20_read_powermode(const DS18B20_onewire_t * const onewire, 
 /**
  * @brief Restarts the search procedure by resetting values of the internal search parameters.
  * 
- * It needs to be called at least once before using @see ds18b20_search_rom method.
+ * It needs to be called at least once before using ds18b20_search_rom() method.
  * 
  * @param onewire Pointer to specified One-Wire bus characteristics instance
  * @param alarmSearchMode Specifies search mode - 1 means searching for alarms, 0 means searching for devices

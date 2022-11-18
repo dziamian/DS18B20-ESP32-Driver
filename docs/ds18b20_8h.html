@@ -274,7 +274,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Configures the selected device with the specified options. </p>
-<p >Changes set configuration of chosen DS18B20 and acquires it from the memory. Optionally, validates received data from the One-Wire line with CRC checksum. All configuration options must be specified, because all of them will be written into DS18B20 memory. In order to initialize them with default values, please use </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#a9da64c1d9ca1d5cc272f635bff391835" title="Initializes configuration options of DS18B20 with the default values (power-on reset values).">ds18b20__InitConfigDefault</a> method.</dd></dl>
+<p >Changes set configuration of chosen DS18B20 and acquires it from the memory. Optionally, validates received data from the One-Wire line with CRC checksum. All configuration options must be specified, because all of them will be written into DS18B20 memory. In order to initialize them with default values, please use <a class="el" href="ds18b20_8h.html#a9da64c1d9ca1d5cc272f635bff391835" title="Initializes configuration options of DS18B20 with the default values (power-on reset values).">ds18b20__InitConfigDefault()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
@@ -321,9 +321,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Searches for the next device whose last measured temperature is within the specified alarm range. </p>
-<p >Performs one alarm search cycle and saves the index of the found device. Optionally, validates received data (ROM address) from the One-Wire line with CRC checksum. When no more or no devices have a temperature within the specified alarm range in their memory, then status code of the operation will indicate this with the proper value. In order to request temperature for selected DS18B20, please use </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#a2c265d8a1bc3eb27bb2aa742fe784ee2" title="Only requests chosen DS18B20 for temperature convertion without reading its value.">ds18b20__RequestTemperatureC</a> or </dd>
-<dd>
-<a class="el" href="ds18b20_8h.html#abc0a1e6dc7bb8d59e743df48e9f89b80" title="Only requests chosen DS18B20 for temperature convertion without reading its value while periodically ...">ds18b20__RequestTemperatureCWithChecking</a> method.</dd></dl>
+<p >Performs one alarm search cycle and saves the index of the found device. Optionally, validates received data (ROM address) from the One-Wire line with CRC checksum. When no more or no devices have a temperature within the specified alarm range in their memory, then status code of the operation will indicate this with the proper value. In order to request temperature for selected DS18B20, please use <a class="el" href="ds18b20_8h.html#a2c265d8a1bc3eb27bb2aa742fe784ee2" title="Only requests chosen DS18B20 for temperature convertion without reading its value.">ds18b20__RequestTemperatureC()</a> or <a class="el" href="ds18b20_8h.html#abc0a1e6dc7bb8d59e743df48e9f89b80" title="Only requests chosen DS18B20 for temperature convertion without reading its value while periodically ...">ds18b20__RequestTemperatureCWithChecking()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
@@ -440,15 +438,7 @@ Functions</h2></td></tr>
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
     <tr><td class="paramname">deviceIndex</td><td>Index of the selected device </td></tr>
     <tr><td class="paramname">temperatureOut</td><td>Pointer to variable where received temperature will be saved eventually </td></tr>
-    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of the temperature convertion will be checked (in milliseconds), given value cannot be less than </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#ac90456da63a12b6654c7458e4845f8c4">DS18B20_CHECK_PERIOD_MIN_MS</a>, value equals to </dd>
-<dd>
-<a class="el" href="ds18b20_8h.html#a965b212f4a22f7eca200538c2cfc8f38">DS18B20_NO_CHECK_PERIOD</a> means that method will wait the maximum possible time required for temperature convertion </dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
+    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of the temperature convertion will be checked (in milliseconds), given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS, value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion </td></tr>
     <tr><td class="paramname">checksum</td><td>Specifies if CRC checksum should be calculated during all performed operations </td></tr>
   </table>
   </dd>
@@ -474,7 +464,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Initializes configuration options of DS18B20 with the default values (power-on reset values). </p>
-<p >For more details about default configuration of DS18B20 please check </p><dl class="section see"><dt>See also</dt><dd>ds18b20_registers header file.</dd></dl>
+<p >For more details about default configuration of DS18B20 please check ds18b20_registers() header file.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">config</td><td>Pointer to device configuration instance to initialize </td></tr>
@@ -622,13 +612,10 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
     <tr><td class="paramname">deviceIndex</td><td>Index of the selected device </td></tr>
-    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of the temperature convertion will be checked (in milliseconds), given value cannot be less than </td></tr>
+    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of the temperature convertion will be checked (in milliseconds), given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS, value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#ac90456da63a12b6654c7458e4845f8c4">DS18B20_CHECK_PERIOD_MIN_MS</a>, value equals to </dd>
-<dd>
-<a class="el" href="ds18b20_8h.html#a965b212f4a22f7eca200538c2cfc8f38">DS18B20_NO_CHECK_PERIOD</a> means that method will wait the maximum possible time required for temperature convertion </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>DS18B20_error_t Status code of the operation </dd></dl>
 
 </div>
@@ -723,15 +710,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
     <tr><td class="paramname">deviceIndex</td><td>Index of the selected device </td></tr>
-    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of restoring data will be checked (in milliseconds), given value cannot be less than </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#ac90456da63a12b6654c7458e4845f8c4">DS18B20_CHECK_PERIOD_MIN_MS</a>, value equals to </dd>
-<dd>
-<a class="el" href="ds18b20_8h.html#a965b212f4a22f7eca200538c2cfc8f38">DS18B20_NO_CHECK_PERIOD</a> means that method will wait the maximum possible time required for temperature convertion </dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
+    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of restoring data will be checked (in milliseconds), given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS, value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion </td></tr>
     <tr><td class="paramname">checksum</td><td>Specifies if CRC checksum should be calculated during all performed operations </td></tr>
   </table>
   </dd>
@@ -817,13 +796,10 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to One-Wire bus characteristics instance </td></tr>
     <tr><td class="paramname">deviceIndex</td><td>Index of the selected device </td></tr>
-    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of copying data will be checked (in milliseconds), given value cannot be less than </td></tr>
+    <tr><td class="paramname">checkPeriodMs</td><td>Specifies how often the status of copying data will be checked (in milliseconds), given value cannot be less than DS18B20_CHECK_PERIOD_MIN_MS, value equals to DS18B20_NO_CHECK_PERIOD means that method will wait the maximum possible time required for temperature convertion </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20_8h.html#ac90456da63a12b6654c7458e4845f8c4">DS18B20_CHECK_PERIOD_MIN_MS</a>, value equals to </dd>
-<dd>
-<a class="el" href="ds18b20_8h.html#a965b212f4a22f7eca200538c2cfc8f38">DS18B20_NO_CHECK_PERIOD</a> means that method will wait the maximum possible time required for temperature convertion </dd></dl>
 <dl class="section return"><dt>Returns</dt><dd>DS18B20_error_t Status code of the operation </dd></dl>
 
 </div>

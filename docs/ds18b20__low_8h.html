@@ -349,9 +349,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sends a request for converting temperature to the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. If selected device is working in a parasite power mode, strong pullup will be enabled. In this specific case all interrupts are disabled while performing the operation.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. If selected device is working in a parasite power mode, strong pullup will be enabled. In this specific case all interrupts are disabled while performing the operation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -390,9 +388,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sends a request for copying scratchpad into non-volatile EEPROM memory of the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. Only configurable bytes stored in device memory will be copied into its EEPROM. If selected device is working in a parasite power mode, strong pullup will be enabled. In this specific case all interrupts are disabled while performing the operation.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. Only configurable bytes stored in device memory will be copied into its EEPROM. If selected device is working in a parasite power mode, strong pullup will be enabled. In this specific case all interrupts are disabled while performing the operation.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -633,11 +629,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reads the all scratchpad memory from the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. All bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance. If you want to read only part of the memory, please use </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#a0281f9b99d08f3490c12974d10bb947f" title="Reads the specified part of the scratchpad memory from the selected DS18B20.">ds18b20_read_scratchpad_with_stop</a> method instead.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. All bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance. If you want to read only part of the memory, please use <a class="el" href="ds18b20__low_8h.html#a0281f9b99d08f3490c12974d10bb947f" title="Reads the specified part of the scratchpad memory from the selected DS18B20.">ds18b20_read_scratchpad_with_stop()</a> method instead.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -682,9 +674,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Reads the specified part of the scratchpad memory from the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. Only number of selected bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance. The remaining bytes in the buffer will be unchanged.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. Only number of selected bytes from device memory will be read and stored in the internal buffer of chosen DS18B20 characteristics instance. The remaining bytes in the buffer will be unchanged.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -714,9 +704,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Sends a request for recalling scratchpad from non-volatile EEPROM memory of the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. Only configurable bytes stored in device EEPROM memory will be recalled.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. Only configurable bytes stored in device EEPROM memory will be recalled.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -782,7 +770,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Restarts the search procedure by resetting values of the internal search parameters. </p>
-<p >It needs to be called at least once before using </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a7d23f84bc4a8ad0081f9719b17cce055" title="Performs one cycle of the device or alarm searching procedure.">ds18b20_search_rom</a> method.</dd></dl>
+<p >It needs to be called at least once before using <a class="el" href="ds18b20__low_8h.html#a7d23f84bc4a8ad0081f9719b17cce055" title="Performs one cycle of the device or alarm searching procedure.">ds18b20_search_rom()</a> method.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -827,7 +815,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs one cycle of the device or alarm searching procedure. </p>
-<p >Found ROM address is saved in specified buffer or in the next One-Wire device characteristics internal buffer if it was not defined by the user. Before the first use </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#aca4556cec99668a7724a03c6567dad92" title="Restarts the search procedure by resetting values of the internal search parameters.">ds18b20_restart_search</a> call is required to initialize the internal search parameters. In alarm search mode, buffer need to be always specified by the user, otherwise the function will not be executed properly. Search parameters are reset automatically when all search cycles have been performed or search mode has been changed.</dd></dl>
+<p >Found ROM address is saved in specified buffer or in the next One-Wire device characteristics internal buffer if it was not defined by the user. Before the first use <a class="el" href="ds18b20__low_8h.html#aca4556cec99668a7724a03c6567dad92" title="Restarts the search procedure by resetting values of the internal search parameters.">ds18b20_restart_search()</a> call is required to initialize the internal search parameters. In alarm search mode, buffer need to be always specified by the user, otherwise the function will not be executed properly. Search parameters are reset automatically when all search cycles have been performed or search mode has been changed.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -867,7 +855,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Selects one device connected to One-Wire bus by sending its ROM address to the line. </p>
-<p >This method is required to call before using any of functional commands like converting temperature. In case when only one device is connected to the bus, </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a> method could be use instead.</dd></dl>
+<p >This method is required to call before using any of functional commands like converting temperature. In case when only one device is connected to the bus, <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a> method could be use instead.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -896,7 +884,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Skips selecting device by sending an appropriate command code. </p>
-<p >This method is required to call before using any of functional commands like converting temperature. This method can be used only if one device is connected to the One-Wire bus. In any other cases, please use </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> method instead.</dd></dl>
+<p >This method is required to call before using any of functional commands like converting temperature. This method can be used only if one device is connected to the One-Wire bus. In any other cases, please use <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> method instead.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
@@ -1010,9 +998,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Writes the scratchpad of the selected DS18B20. </p>
-<p >Before calling this you need to select device by using one of these methods </p><dl class="section see"><dt>See also</dt><dd><a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select</a> or </dd>
-<dd>
-<a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select</a>. Only configurable bytes stored in the internal buffer of DS18B20 characteristics instance will be written to the device memory.</dd></dl>
+<p >Before calling this you need to select device by using one of these methods <a class="el" href="ds18b20__low_8h.html#a1da912061cc62bd9f897fab56ec54211" title="Selects one device connected to One-Wire bus by sending its ROM address to the line.">ds18b20_select()</a> or <a class="el" href="ds18b20__low_8h.html#aa54499b39cf5b780bf70d2f738f495a3" title="Skips selecting device by sending an appropriate command code.">ds18b20_skip_select()</a>. Only configurable bytes stored in the internal buffer of DS18B20 characteristics instance will be written to the device memory.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">onewire</td><td>Pointer to specified One-Wire bus characteristics instance </td></tr>
