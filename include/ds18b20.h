@@ -48,6 +48,7 @@ typedef struct DS18B20_config_t DS18B20_config_t;
 /**
  * @brief Describes configuration options for DS18B20.
  * 
+ * @note Structure can be initialized with default values using ds18b20__InitConfigDefault() method.
  */
 struct DS18B20_config_t
 {
@@ -75,7 +76,7 @@ DS18B20_error_t ds18b20__InitOneWire(DS18B20_onewire_t * const onewire, const in
 /**
  * @brief Initializes configuration options of DS18B20 with the default values (power-on reset values).
  * 
- * For more details about default configuration of DS18B20 please check ds18b20_registers() header file.
+ * @note For more details about default configuration of DS18B20 please check ds18b20_registers.h file.
  * 
  * @param config Pointer to device configuration instance to initialize
  * @return DS18B20_error_t Status code of the operation
@@ -150,7 +151,7 @@ DS18B20_error_t ds18b20__GetTemperatureCWithChecking(const DS18B20_onewire_t * c
  * Changes set configuration of chosen DS18B20 and acquires it from the memory.
  * Optionally, validates received data from the One-Wire line with CRC checksum.
  * All configuration options must be specified, because all of them will be written into DS18B20 memory.
- * In order to initialize them with default values, please use ds18b20__InitConfigDefault() method.
+ * @note In order to initialize them with default values, please use ds18b20__InitConfigDefault() method.
  * 
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndex Index of the selected device
@@ -167,7 +168,7 @@ DS18B20_error_t ds18b20__Configure(const DS18B20_onewire_t * const onewire, cons
  * Optionally, validates received data (ROM address) from the One-Wire line with CRC checksum.
  * When no more or no devices have a temperature within the specified alarm range in their memory, 
  * then status code of the operation will indicate this with the proper value.
- * In order to request temperature for selected DS18B20, please use ds18b20__RequestTemperatureC() or ds18b20__RequestTemperatureCWithChecking() method.
+ * @note In order to request temperature for selected DS18B20, please use ds18b20__RequestTemperatureC() or ds18b20__RequestTemperatureCWithChecking() method.
  * 
  * @param onewire Pointer to One-Wire bus characteristics instance
  * @param deviceIndexOut Pointer to variable where index of the found device will be saved eventually
