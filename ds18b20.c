@@ -456,7 +456,7 @@ static void ds18b20_waitWithChecking(const DS18B20_onewire_t * const onewire, ui
     {
         vTaskDelay(pdMS_TO_TICKS(checkPeriodMs));
 
-        if (DS18B20_WAITING_END >= (waitPeriodMs - checkPeriodMs) || ds18b20_read_bit(onewire))
+        if (DS18B20_WAITING_END >= (int16_t)(waitPeriodMs - checkPeriodMs) || ds18b20_read_bit(onewire))
         {
             break;
         }
