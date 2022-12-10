@@ -204,7 +204,7 @@ if (DS18B20_OK != ds18b20__RestoreRegisters(&ds18b20_oneWire, DS18B20_FIRST_DEVI
 
 ## Using Parasite Mode
 
-Some functionalities are unavailable when device is using parasite power mode. Checking status for operations like temperature convertion or copying memory into EEPROM is not possible because of technical issues. For this reason in such cases methods like `ds18b20GetTemperatureCWithChecking`, `ds18b20RequestTemperatureWithChecking` and `ds18b20__StoreRegistersWithChecking` will fail with an appropriate status code. Additionally, when the mentioned operations are performing, no other 1-Wire bus activity may take place during this time (like performing another operation with the next device).
+Some functionalities are unavailable when device is using parasite power mode. Checking status for operations like temperature convertion or copying memory into EEPROM is not possible because of technical issues. For this reason in such cases methods like `ds18b20__GetTemperatureCWithChecking`, `ds18b20__RequestTemperatureWithChecking` and `ds18b20__StoreRegistersWithChecking` will fail with an appropriate status code. Additionally, when the mentioned operations are performing, no other 1-Wire bus activity may take place during this time (like performing another operation with the next device).
 
 Consult [DS18B20 datasheet](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf) for more details about parasite power mode. 
 
