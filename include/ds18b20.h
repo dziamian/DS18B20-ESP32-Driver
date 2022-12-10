@@ -62,7 +62,7 @@ struct DS18B20_config_t
  * 
  * Prepares given GPIO to communicate with One-Wire protocol, searches for specified amount of devices,
  * reads and sets their ROM addresses for proper identification, power modes and scratchpad memory.
- * This method need to be called before using any other high-level driver functions.
+ * @note This method need to be called before using any other high-level driver functions.
  * 
  * @param onewire Pointer to One-Wire bus characteristics instance to initialize
  * @param bus Chosen GPIO for One-Wire bus

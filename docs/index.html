@@ -289,7 +289,7 @@ Examples</h1>
 </ul>
 <h1><a class="anchor" id="autotoc_md5"></a>
 Using Parasite Mode</h1>
-<p >Some functionalities are unavailable when device is using parasite power mode. Checking status for operations like temperature convertion or copying memory into EEPROM is not possible because of technical issues. For this reason in such cases methods like <code>ds18b20GetTemperatureCWithChecking</code>, <code>ds18b20RequestTemperatureWithChecking</code> and <code>ds18b20__StoreRegistersWithChecking</code> will fail with an appropriate status code. Additionally, when the mentioned operations are performing, no other 1-Wire bus activity may take place during this time (like performing another operation with the next device).</p>
+<p >Some functionalities are unavailable when device is using parasite power mode. Checking status for operations like temperature convertion or copying memory into EEPROM is not possible because of technical issues. For this reason in such cases methods like <code>ds18b20__GetTemperatureCWithChecking</code>, <code>ds18b20__RequestTemperatureWithChecking</code> and <code>ds18b20__StoreRegistersWithChecking</code> will fail with an appropriate status code. Additionally, when the mentioned operations are performing, no other 1-Wire bus activity may take place during this time (like performing another operation with the next device).</p>
 <p >Consult <a href="https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf">DS18B20 datasheet</a> for more details about parasite power mode.</p>
 <h1><a class="anchor" id="autotoc_md6"></a>
 Documentation</h1>
